@@ -15,6 +15,7 @@ namespace CoreTaskManager.Models
         }
 
         public DbSet<CoreTaskManager.Model.Progress> Progress { get; set; }
+        public DbSet<CoreTaskManager.Model.Participant> Participants { get; set; }
         public DbSet<CoreTaskManager.Model.TaskModel> Task { get; set; }
     }
 }

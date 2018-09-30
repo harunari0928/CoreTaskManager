@@ -26,7 +26,7 @@ namespace CoreTaskManager.Pages.Progresses
         public SelectList Genres { get; set; }
         public string ProgressGenre { get; set; }
 
-        public async Task OnGetAsync(string searchString)
+        public async Task OnGetAsync(string searchString, string progressGenre)
         {
             var genreQuery = from m in _context.Progress
                              orderby m.Genre
@@ -38,6 +38,10 @@ namespace CoreTaskManager.Pages.Progresses
             if (!String.IsNullOrEmpty(searchString))
             {
                 progresses = progresses.Where(p => p.Title.Contains(searchString));
+            }
+            if (!String.IsNullOrEmpty(progressGenre))
+            {
+                progresses = progresses.Where(x => x.Genre == progressGenre);
             }
             Genres = new SelectList(await genreQuery.Distinct().ToListAsync());
             Progress = await progresses.ToListAsync();

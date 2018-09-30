@@ -10,20 +10,20 @@
 <p>
     <a asp-page="Create">Create New</a>
 </p>
-<table class="table">
+<table>
     <thead>
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.TaskModel[0].ProgressId)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.TaskModel[0].TaskName)
-            </th>
             <th></th>
+            @foreach (var item in Model.Participants)
+            {
+                <th>
+                    @Html.DisplayFor(modelItem => item.UserName)
+                </th>
+            }
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model.TaskModel) {
+@*@foreach (var item in Model.TaskModel) {
         <tr>
             <td>
                 @Html.DisplayFor(modelItem => item.ProgressId)
@@ -37,6 +37,6 @@
                 <a asp-page="./Delete" asp-route-id="@item.Id">Delete</a>
             </td>
         </tr>
-}
+}*@
     </tbody>
 </table>
