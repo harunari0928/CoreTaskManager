@@ -1,0 +1,61 @@
+﻿@page
+@model CoreTaskManager.Pages.Progresses.DetailsModel
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<h2>Details</h2>
+
+<div>
+    <h4>Progress</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.Progress.UserName)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Progress.UserName)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Progress.Title)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Progress.Title)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Progress.RegisteredDateTime)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Progress.RegisteredDateTime)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Progress.NumberOfItems)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Progress.NumberOfItems)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Progress.SlackAppUrl)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Progress.SlackAppUrl)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Progress.Image)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Progress.Image)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Progress.Description)
+        </dt>
+        <dd>
+            @Html.DisplayFor(model => model.Progress.Description)
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-page="./Edit" asp-route-id="@Model.Progress.Id">Edit</a> |
+    <a asp-page="./Index">Back to List</a>
+</div>

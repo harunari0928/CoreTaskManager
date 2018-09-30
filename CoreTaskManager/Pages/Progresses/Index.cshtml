@@ -1,0 +1,70 @@
+﻿@page
+@model CoreTaskManager.Pages.Progresses.IndexModel
+
+@{
+    ViewData["Title"] = "Index";
+}
+<br />
+@*タイトル*@
+<div class="jumbotron">
+    <h1 class="display-4">進捗一覧</h1>
+    <p class="lead">
+        ここでは作成されたタスク管理を見ることができます。作成者で検索をかけることも可能です。
+    </p>
+    <hr class="my-4" />
+    <p>新たなタスク管理を作成しましょう。</p>
+    <p class="lead">
+        <a  class="btn btn-primary" asp-page="/Progresses/Create">
+            新規作成
+        </a>
+    </p>
+</div>
+
+@*検索*@
+<form>
+    <p>
+        <select asp-for="ProgressGenre" asp-items="Model.Genres">
+            <option value="">All</option>
+        </select>
+
+        Title: <input type="text" name="SearchString" />
+        <input type="submit" value="Filter" />
+    </p>
+</form>
+
+@*進捗一覧*@
+<div class="album py-5 bg-light">
+    <div class="container">
+        <div class="row">
+            @foreach (var item in Model.Progress)
+            {
+                <div class="col-md-4">
+                    <div class="card mb-4 box-shadow">
+                        <img class="card-img-top" data-src="holder.js/100px225?theme=thumb&amp;bg=55595c&amp;fg=eceeef&amp;text=Thumbnail" alt="Thumbnail [100%x225]" style="height: 225px; width: 100%; display: block;" src="@Html.DisplayFor(modelItem => item.Image)" data-holder-rendered="true">
+                        <div class="card-body">
+                            <p class="card-text">
+                                @Html.DisplayFor(modelItem => item.RegisteredDateTime)
+                                <br />
+                                @Html.DisplayFor(modelItem => item.Genre)>@Html.DisplayFor(modelItem => item.Title)
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="btn-group">
+                                    <a class="btn btn-sm btn-outline-secondary" asp-page="./Details" asp-route-id="@item.Id">
+                                        Detail
+                                    </a>
+                                    <a class="btn btn-sm btn-outline-secondary" asp-page="./Edit" asp-route-id="@item.Id">
+                                        Edit
+                                    </a>
+                                    <a class="btn btn-sm btn-outline-secondary" asp-page="./Delete" asp-route-id="@item.Id">
+                                        Delete
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
