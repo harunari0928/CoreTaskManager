@@ -16,9 +16,18 @@ using Microsoft.Extensions.DependencyInjection;
 using CoreTaskManager.Models;
 using Microsoft.Extensions.FileProviders;
 using System.IO;
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 namespace CoreTaskManager
 {
+    public class EmailSender : IEmailSender
+    {
+        public Task SendEmailAsync(string email, string subject, string message)
+        {
+            return Task.CompletedTask;
+        }
+    }
+
     public class Startup
     {
         public Startup(IConfiguration configuration)
@@ -38,12 +47,36 @@ namespace CoreTaskManager
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
+            #region 認証
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")));
             services.AddDefaultIdentity<IdentityUser>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
+            services.AddIdentity<IdentityUser, IdentityRole>()
+        // services.AddDefaultIdentity<IdentityUser>()
+        .AddEntityFrameworkStores<ApplicationDbContext>()
+        .AddDefaultTokenProviders();
+
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
+                .AddRazorPagesOptions(options =>
+                {
+                    options.AllowAreas = true;
+                    options.Conventions.AuthorizeAreaFolder("Identity", "/Account/Manage");
+                    options.Conventions.AuthorizeAreaPage("Identity", "/Account/Logout");
+                });
+
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.LoginPath = $"/Identity/Account/Login";
+                options.LogoutPath = $"/Identity/Account/Logout";
+                options.AccessDeniedPath = $"/Identity/Account/AccessDenied";
+            });
+
+            services.AddSingleton<IEmailSender, EmailSender>();
+
+            
             services.Configure<IdentityOptions>(options =>
             {
                 // Password settings.
@@ -65,6 +98,24 @@ namespace CoreTaskManager
                 options.User.RequireUniqueEmail = false;
             });
 
+            services.ConfigureApplicationCookie(options =>
+            {
+                // Cookie settings
+                options.Cookie.HttpOnly = true;
+                options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
+
+                options.LoginPath = "/Identity/Account/Login";
+                options.AccessDeniedPath = "/Identity/Account/AccessDenied";
+                options.SlidingExpiration = true;
+            });
+
+            // 外部認証を追加するときはこちらにチェーンして追加する
+            services.AddAuthentication().AddMicrosoftAccount(microsoftOptions =>
+            {
+                microsoftOptions.ClientId = Configuration["Authentication:Microsoft:"];
+                microsoftOptions.ClientSecret = Configuration["Authentication:Microsoft:"];
+            });
+            #endregion
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
@@ -74,17 +125,7 @@ namespace CoreTaskManager
             services.AddDistributedMemoryCache();
             services.AddSession();
 
-            // 本来はIdentityUserを継承したApplicationUserクラスを作って型変数に配置する
-            services.AddIdentity<IdentityUser, IdentityRole>()
-            .AddEntityFrameworkStores<ApplicationDbContext>()
-            .AddDefaultTokenProviders();
 
-            // 外部認証を追加するときはこちらにチェーンして追加する
-            services.AddAuthentication().AddMicrosoftAccount(microsoftOptions =>
-            {
-                microsoftOptions.ClientId = Configuration[""];
-                microsoftOptions.ClientSecret = Configuration[""];
-            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -105,6 +146,7 @@ namespace CoreTaskManager
             app.UseStaticFiles();
             app.UseCookiePolicy();
             app.UseSession();
+
             app.UseAuthentication();
 
             app.UseMvc();
