@@ -261,9 +261,9 @@ __pycache__/
 *.pyc
 
 # ImageFile
-/wwwroot/*.png
-/wwwroot/*.jpg
-/wwwroot/*.jpeg
+/CoreTaskManager/wwwroot/*.png
+/CoreTaskManager/wwwroot/*.jpg
+/CoreTaskManager/wwwroot/*.jpeg
 
 # setting
-/appsettings.json
+/CoreTaskManager/appsettings.json
