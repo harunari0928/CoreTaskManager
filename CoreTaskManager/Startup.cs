@@ -54,11 +54,6 @@ namespace CoreTaskManager
             services.AddDefaultIdentity<IdentityUser>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
-            services.AddIdentity<IdentityUser, IdentityRole>()
-        // services.AddDefaultIdentity<IdentityUser>()
-        .AddEntityFrameworkStores<ApplicationDbContext>()
-        .AddDefaultTokenProviders();
-
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
                 .AddRazorPagesOptions(options =>
                 {
@@ -112,8 +107,8 @@ namespace CoreTaskManager
             // 外部認証を追加するときはこちらにチェーンして追加する
             services.AddAuthentication().AddMicrosoftAccount(microsoftOptions =>
             {
-                microsoftOptions.ClientId = Configuration["Authentication:Microsoft:"];
-                microsoftOptions.ClientSecret = Configuration["Authentication:Microsoft:"];
+                microsoftOptions.ClientId = Configuration["Authentication:Microsoft:ApplicationId"];
+                microsoftOptions.ClientSecret = Configuration["Authentication:Microsoft:Password"];
             });
             #endregion
 
