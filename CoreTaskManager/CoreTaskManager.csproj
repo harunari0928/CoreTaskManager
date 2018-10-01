@@ -10,6 +10,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="ApplicationUser.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="wwwroot\js\Create.js" />
   </ItemGroup>
 
