@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authentication.MicrosoftAccount;
 using Microsoft.EntityFrameworkCore;
 using CoreTaskManager.Data;
 using Microsoft.Extensions.Configuration;
@@ -72,6 +73,18 @@ namespace CoreTaskManager
 
             services.AddDistributedMemoryCache();
             services.AddSession();
+
+            // 本来はIdentityUserを継承したApplicationUserクラスを作って型変数に配置する
+            services.AddIdentity<IdentityUser, IdentityRole>()
+            .AddEntityFrameworkStores<ApplicationDbContext>()
+            .AddDefaultTokenProviders();
+
+            // 外部認証を追加するときはこちらにチェーンして追加する
+            services.AddAuthentication().AddMicrosoftAccount(microsoftOptions =>
+            {
+                microsoftOptions.ClientId = Configuration[""];
+                microsoftOptions.ClientSecret = Configuration[""];
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
