@@ -261,9 +261,9 @@ __pycache__/
 *.pyc
 
 # ImageFile
-*.png
-*.jpg
-*.jpeg
+/wwwroot/*.png
+/wwwroot/*.jpg
+/wwwroot/*.jpeg
 
 # setting
-appsettings.json
+/appsettings.json
