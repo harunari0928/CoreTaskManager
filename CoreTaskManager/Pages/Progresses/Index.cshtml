@@ -26,9 +26,11 @@
         <select asp-for="ProgressGenre" asp-items="Model.Genres">
             <option value="">All</option>
         </select>
-
+        <input type="text" name="CurrentPage" />
         Title: <input type="text" name="SearchString" />
+               
         <input type="submit" value="Filter" />
+
     </p>
 </form>
 

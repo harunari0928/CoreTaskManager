@@ -16,17 +16,19 @@ namespace CoreTaskManager.Pages.Progresses
     public class IndexModel : PageModel
     {
         private readonly CoreTaskManager.Models.CoreTaskManagerContext _context;
+        private readonly int _pageSize;
 
         public IndexModel(CoreTaskManager.Models.CoreTaskManagerContext context)
         {
             _context = context;
+            _pageSize = 12;
         }
 
         public IList<Progress> Progress { get;set; }
         public SelectList Genres { get; set; }
         public string ProgressGenre { get; set; }
 
-        public async Task OnGetAsync(string searchString, string progressGenre)
+        public async Task OnGetAsync(string progressGenre, string searchString, string currentPage)
         {
             var genreQuery = from m in _context.Progress
                              orderby m.Genre
@@ -43,9 +45,30 @@ namespace CoreTaskManager.Pages.Progresses
             {
                 progresses = progresses.Where(x => x.Genre == progressGenre);
             }
+            progresses = progresses.Paging(currentPage, _pageSize);
+
+
             Genres = new SelectList(await genreQuery.Distinct().ToListAsync());
             Progress = await progresses.ToListAsync();
         }
+
+     
+    }
+
+    static class MyExtenisons
+    {
+        // TODO: テスト
+        public static IQueryable<Progress> Paging(this IQueryable<Progress> progresses,string strCurrentPage, int pageSize)
+        {
+            // もし変数currenPageが不正な値であればページは１とする
+            if (!int.TryParse(strCurrentPage, out int currentPage))
+            {
+                currentPage = 1;
+            }
+            return progresses.Skip((currentPage - 1) * pageSize).Take(pageSize);
+
+        }
+
     }
 
 
