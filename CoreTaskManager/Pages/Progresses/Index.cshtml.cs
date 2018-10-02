@@ -1,14 +1,12 @@
-﻿using System;
+﻿using CoreTaskManager.Model;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
-using CoreTaskManager.Model;
-using CoreTaskManager.Models;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace CoreTaskManager.Pages.Progresses
 {
@@ -45,10 +43,6 @@ namespace CoreTaskManager.Pages.Progresses
         }
         public async Task OnPostCurrentPage()
         {
-            if (CurrentPage > _lastPage)
-            {
-                CurrentPage = _lastPage;
-            }
             var progresses = FilterProgresses(_progressGenre, _searchString);
             Progress = await progresses.ToListAsync();
             Genres = new SelectList(await GenerateGenreList().Distinct().ToListAsync());
