@@ -17,6 +17,10 @@ namespace CoreTaskManager.Pages.Progresses
     {
         private readonly CoreTaskManager.Models.CoreTaskManagerContext _context;
         private readonly int _pageSize;
+        private static int _numOfProgresses;
+        private static int _lastPage;
+        private static string _progressGenre;
+        private static string _searchString;
 
         public IndexModel(CoreTaskManager.Models.CoreTaskManagerContext context)
         {
@@ -24,16 +28,61 @@ namespace CoreTaskManager.Pages.Progresses
             _pageSize = 12;
         }
 
-        public IList<Progress> Progress { get;set; }
+        public IList<Progress> Progress { get; set; }
         public SelectList Genres { get; set; }
         public string ProgressGenre { get; set; }
+        public static int CurrentPage { get; set; }
 
-        public async Task OnGetAsync(string progressGenre, string searchString, string currentPage)
+        public async Task OnGetAsync(string progressGenre, string searchString)
         {
-            var genreQuery = from m in _context.Progress
-                             orderby m.Genre
-                             select m.Genre;
+            CurrentPage = 1;
+            _progressGenre = progressGenre;
+            _searchString = searchString;
+            var progresses = FilterProgresses(progressGenre, searchString);
+            Progress = await progresses.ToListAsync();
+            Genres = new SelectList(await GenerateGenreList().Distinct().ToListAsync());
 
+        }
+        public async Task OnPostCurrentPage()
+        {
+            if (CurrentPage > _lastPage)
+            {
+                CurrentPage = _lastPage;
+            }
+            var progresses = FilterProgresses(_progressGenre, _searchString);
+            Progress = await progresses.ToListAsync();
+            Genres = new SelectList(await GenerateGenreList().Distinct().ToListAsync());
+        }
+        public async Task OnPostNextPage()
+        {
+            CurrentPage++;
+            if (CurrentPage > _lastPage)
+            {
+                CurrentPage = _lastPage;
+            }
+
+            var progresses = FilterProgresses(_progressGenre, _searchString);
+            Progress = await progresses.ToListAsync();
+            Genres = new SelectList(await GenerateGenreList().Distinct().ToListAsync());
+
+
+        }
+        public async Task OnPostPrevPage()
+        {
+            CurrentPage--;
+            if (CurrentPage < 1)
+            {
+                CurrentPage = 1;
+            }
+            var progresses = FilterProgresses(_progressGenre, _searchString);
+            Progress = await progresses.ToListAsync();
+            Genres = new SelectList(await GenerateGenreList().Distinct().ToListAsync());
+
+        }
+
+        private IQueryable<Progress> FilterProgresses(string progressGenre, string searchString)
+        {
+            ViewData["CurrentPage"] = CurrentPage;
             var progresses = from p in _context.Progress
                              select p;
 
@@ -45,31 +94,26 @@ namespace CoreTaskManager.Pages.Progresses
             {
                 progresses = progresses.Where(x => x.Genre == progressGenre);
             }
-            progresses = progresses.Paging(currentPage, _pageSize);
-
-
-            Genres = new SelectList(await genreQuery.Distinct().ToListAsync());
-            Progress = await progresses.ToListAsync();
+            _numOfProgresses = progresses.Count();
+            _lastPage = _numOfProgresses / _pageSize + 1;
+            return progresses = Paging(progresses, CurrentPage, _pageSize);
         }
-
-     
-    }
-
-    static class MyExtenisons
-    {
-        // TODO: テスト
-        public static IQueryable<Progress> Paging(this IQueryable<Progress> progresses,string strCurrentPage, int pageSize)
+        private IQueryable<string> GenerateGenreList()
+        {
+            var genreQuery = from m in _context.Progress
+                             orderby m.Genre
+                             select m.Genre;
+            return genreQuery;
+        }
+        private IQueryable<Progress> Paging(IQueryable<Progress> progresses, int currentPage, int pageSize)
         {
             // もし変数currenPageが不正な値であればページは１とする
-            if (!int.TryParse(strCurrentPage, out int currentPage))
+            if (currentPage < 1)
             {
                 currentPage = 1;
             }
             return progresses.Skip((currentPage - 1) * pageSize).Take(pageSize);
 
         }
-
     }
-
-
 }

@@ -14,25 +14,41 @@
     <hr class="my-4" />
     <p>新たなタスク管理を作成しましょう。</p>
     <p class="lead">
-        <a  class="btn btn-primary" asp-page="/Progresses/Create">
+        <a class="btn btn-primary" asp-page="/Progresses/Create">
             新規作成
         </a>
     </p>
 </div>
 
-@*検索*@
-<form>
-    <p>
-        <select asp-for="ProgressGenre" asp-items="Model.Genres">
-            <option value="">All</option>
-        </select>
-        <input type="text" name="CurrentPage" />
-        Title: <input type="text" name="SearchString" />
-               
-        <input type="submit" value="Filter" />
-
-    </p>
-</form>
+<div class="container">
+    <div class="row">
+        <div class="col-md-10">
+            @*検索*@
+            <form method="get">
+                <p>
+                    <select asp-for="ProgressGenre" asp-items="Model.Genres">
+                        <option value="">All</option>
+                    </select>
+                </p>
+                Title: <input type="text" name="SearchString" />
+                <input type="submit" value="Filter" class="btn btn-outline-secondary" />
+            </form>
+        </div>
+        <br />
+        <div class="col-md-2">
+            @*ページング*@
+            <form method="post">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination">
+                        <li class="page-item"><input type="submit" asp-page-handler="prevpage" class="page-link" value="Previous" /></li>
+                        <li class="page-item"><input type="submit" asp-page-handler="currentpage" class="page-link" value="@ViewData["CurrentPage"]" /></li>
+                        <li class="page-item"><input type="submit" asp-page-handler="nextpage" class="page-link" value="Next" /></li>
+                    </ul>
+                </nav>
+            </form>
+        </div>
+    </div>
+</div>
 
 @*進捗一覧*@
 <div class="album py-5 bg-light">
@@ -69,5 +85,20 @@
         </div>
     </div>
 </div>
-<script src="js/Progresses.js"></script>
+
+@*ページング*@
+<form method="post">
+    <nav aria-label="Page navigation">
+        <ul class="pagination">
+            <li class="page-item"><input type="submit" asp-page-handler="prevpage" class="page-link" value="Previous" /></li>
+            <li class="page-item"><input type="submit" asp-page-handler="currentpage" class="page-link" value="@ViewData["CurrentPage"]" /></li>
+            <li class="page-item"><input type="submit" asp-page-handler="nextpage" class="page-link" value="Next" /></li>
+        </ul>
+    </nav>
+</form>
+@Html.AntiForgeryToken()
+@section Scripts {
+    <script src="js/Progresses.js"></script>
+}
+
 

@@ -10,6 +10,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Azure\**" />
+    <Content Remove="Azure\**" />
+    <EmbeddedResource Remove="Azure\**" />
+    <None Remove="Azure\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Remove="ApplicationUser.cs" />
   </ItemGroup>
 
@@ -18,6 +25,7 @@
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.1.1" PrivateAssets="All" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="2.1.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
   </ItemGroup>
 
   <ItemGroup>
