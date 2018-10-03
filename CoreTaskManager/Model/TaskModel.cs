@@ -17,7 +17,5 @@ namespace CoreTaskManager.Model
         [Required]
         [StringLength(15)]
         public string TaskName { get; set; }
-        public bool IsCreated { get; set; }
-
     }
 }
