@@ -30,7 +30,7 @@ namespace CoreTaskManager.Pages.Progresses
             _pageSize = 12;
         }
 
-        public IList<Progress> Progress { get; set; }
+        public IList<Progress> Progresses { get; set; }
         public SelectList Genres { get; set; }
         public string ProgressGenre { get; set; }
         
@@ -41,14 +41,14 @@ namespace CoreTaskManager.Pages.Progresses
             HttpContext.Session.SetString(SessionSearchString, searchString ?? "");
             
             var progresses = FilterProgresses(progressGenre, searchString);
-            Progress = await progresses.ToListAsync();
+            Progresses = await progresses.ToListAsync();
             Genres = new SelectList(await GenerateGenreList().ToListAsync());
 
         }
         public async Task OnPostCurrentPage()
         {
             var progresses = FilterProgresses(HttpContext.Session.GetString(SessionProgressGenre), HttpContext.Session.GetString(SessionSearchString));
-            Progress = await progresses.ToListAsync();
+            Progresses = await progresses.ToListAsync();
             Genres = new SelectList(await GenerateGenreList().ToListAsync());
         }
         public async Task OnPostNextPage()
@@ -66,7 +66,7 @@ namespace CoreTaskManager.Pages.Progresses
             }
 
             var progresses = FilterProgresses(HttpContext.Session.GetString(SessionProgressGenre), HttpContext.Session.GetString(SessionSearchString));
-            Progress = await progresses.ToListAsync();
+            Progresses = await progresses.ToListAsync();
             Genres = new SelectList(await GenerateGenreList().ToListAsync());
 
 
@@ -84,7 +84,7 @@ namespace CoreTaskManager.Pages.Progresses
                 HttpContext.Session.SetString(SessionCurrentPage,_currentPage.ToString());
             }
             var progresses = FilterProgresses(HttpContext.Session.GetString(SessionProgressGenre), HttpContext.Session.GetString(SessionSearchString));
-            Progress = await progresses.ToListAsync();
+            Progresses = await progresses.ToListAsync();
             Genres = new SelectList(await GenerateGenreList().ToListAsync());
 
         }

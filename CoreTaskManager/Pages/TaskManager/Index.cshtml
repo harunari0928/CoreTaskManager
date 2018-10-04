@@ -2,25 +2,28 @@
 @model CoreTaskManager.Pages.TaskManager.IndexModel
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = Model.ThisProgress.Title;
 }
 <style>
     .alert1 {
         color: red;
     }
 </style>
-<h2>Index</h2>
+<h2>@Model.ThisProgress.Title</h2>
 @*ボタン群*@
 <div class="container">
     <div class="row">
         <div class="col-md-2">
-            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#registerNew">
-                タスク設定
-            </button>
+            @*まだタスクが登録されていないときのみタスク設定できる*@
+            @if (Model.ThisProgress.NumberOfItems == 0)
+            {
+                <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#registerNew" id="modalButton">
+                    タスク設定
+                </button>
+            }
         </div>
     </div>
 </div>
-
 @*タスク登録*@
 <div class="modal fade" id="registerNew" tabindex="-1" role="dialog" aria-labelledby="#registerNewTitle" aria-hidden="true">
     <div class="modal-dialog" role="document">
@@ -34,7 +37,7 @@
             <div class="modal-body">
                 <div class="form-group" id="1">
                     <div id="task1Alert" class="alert1"></div>
-                    <label>・タスク1(10文字以内)</label>
+                    <label>・タスク1(15文字以内)</label>
                     <input type="text" id="task1" class="form-control" />
                 </div>
                 @*追加タスク*@
