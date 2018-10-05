@@ -29,7 +29,7 @@ namespace CoreTaskManager.Pages.Progresses
                 return NotFound();
             }
 
-            Progress = await _context.Progress.FirstOrDefaultAsync(m => m.Id == id);
+            Progress = await _context.Progresses.FirstOrDefaultAsync(m => m.Id == id);
 
             if (Progress == null)
             {
@@ -45,11 +45,11 @@ namespace CoreTaskManager.Pages.Progresses
                 return NotFound();
             }
 
-            Progress = await _context.Progress.FindAsync(id);
+            Progress = await _context.Progresses.FindAsync(id);
 
             if (Progress != null)
             {
-                _context.Progress.Remove(Progress);
+                _context.Progresses.Remove(Progress);
                 await _context.SaveChangesAsync();
             }
 

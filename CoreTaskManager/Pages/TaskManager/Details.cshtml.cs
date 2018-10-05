@@ -28,7 +28,7 @@ namespace CoreTaskManager.Pages.TaskManager
                 return NotFound();
             }
 
-            TaskModel = await _context.Task.FirstOrDefaultAsync(m => m.Id == id);
+            TaskModel = await _context.Tasks.FirstOrDefaultAsync(m => m.Id == id);
 
             if (TaskModel == null)
             {

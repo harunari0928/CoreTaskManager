@@ -127,9 +127,12 @@ class OperateTaskForm {
             }
         });
         if (transmitSuccessFlag) {
-            return "success"
+            return "success";
         } else {
-            return "failed"
+            return "failed";
         }
     }
 }
+
+
+

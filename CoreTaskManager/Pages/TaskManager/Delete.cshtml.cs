@@ -29,7 +29,7 @@ namespace CoreTaskManager.Pages.TaskManager
                 return NotFound();
             }
 
-            TaskModel = await _context.Task.FirstOrDefaultAsync(m => m.Id == id);
+            TaskModel = await _context.Tasks.FirstOrDefaultAsync(m => m.Id == id);
 
             if (TaskModel == null)
             {
@@ -45,11 +45,11 @@ namespace CoreTaskManager.Pages.TaskManager
                 return NotFound();
             }
 
-            TaskModel = await _context.Task.FindAsync(id);
+            TaskModel = await _context.Tasks.FindAsync(id);
 
             if (TaskModel != null)
             {
-                _context.Task.Remove(TaskModel);
+                _context.Tasks.Remove(TaskModel);
                 await _context.SaveChangesAsync();
             }
 

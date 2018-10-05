@@ -56,7 +56,7 @@ namespace CoreTaskManager.Pages.Progresses
             Progress.Image = "/" + imageName;
 
 
-            _context.Progress.Add(Progress);
+            _context.Progresses.Add(Progress);
 
             await _context.SaveChangesAsync();
 

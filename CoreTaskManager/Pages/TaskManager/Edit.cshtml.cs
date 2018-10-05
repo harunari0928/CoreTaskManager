@@ -30,7 +30,7 @@ namespace CoreTaskManager.Pages.TaskManager
                 return NotFound();
             }
 
-            TaskModel = await _context.Task.FirstOrDefaultAsync(m => m.Id == id);
+            TaskModel = await _context.Tasks.FirstOrDefaultAsync(m => m.Id == id);
 
             if (TaskModel == null)
             {
@@ -69,7 +69,7 @@ namespace CoreTaskManager.Pages.TaskManager
 
         private bool TaskModelExists(int id)
         {
-            return _context.Task.Any(e => e.Id == id);
+            return _context.Tasks.Any(e => e.Id == id);
         }
     }
 }

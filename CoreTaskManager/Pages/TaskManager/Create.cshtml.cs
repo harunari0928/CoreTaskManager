@@ -34,7 +34,7 @@ namespace CoreTaskManager.Pages.TaskManager
                 return Page();
             }
 
-            _context.Task.Add(TaskModel);
+            _context.Tasks.Add(TaskModel);
             await _context.SaveChangesAsync();
 
             return RedirectToPage("./Index");

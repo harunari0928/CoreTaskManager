@@ -30,7 +30,7 @@ namespace CoreTaskManager.Pages.Progresses
                 return NotFound();
             }
 
-            Progress = await _context.Progress.FirstOrDefaultAsync(m => m.Id == id);
+            Progress = await _context.Progresses.FirstOrDefaultAsync(m => m.Id == id);
 
             if (Progress == null)
             {
@@ -69,7 +69,7 @@ namespace CoreTaskManager.Pages.Progresses
 
         private bool ProgressExists(int id)
         {
-            return _context.Progress.Any(e => e.Id == id);
+            return _context.Progresses.Any(e => e.Id == id);
         }
     }
 }
