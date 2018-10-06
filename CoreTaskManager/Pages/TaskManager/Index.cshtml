@@ -77,27 +77,32 @@
                                 <th>
                                     @{
                                         var userName = item.UserName.Split('@')[0];
-                                     }
+                                    }
                                     @Html.DisplayFor(modelItem => userName)
                                 </th>
                             }
                         </tr>
                     </thead>
                     <tbody>
+                        @{
+                            string[] columAlphaBet = { "", "A", "B", "C", "D", "E" };
+                            var columNumber = 1;
+                            var rowNumber = 1;
+                        }
                         @foreach (var task in Model.ThisTasks)
                         {
                             <tr>
-                                <td>
-                                    @Html.DisplayFor(modelItem => task.TaskName)
-                                </td>
+                                <td>@Html.DisplayFor(modelItem => task.TaskName)</td>
                                 @*TODO: タスクが完了しているか否かのデータを持ってくる*@
                                 @foreach (var item in Model.Participants)
                                 {
-                                    <td>
-                                        未完了
-                                    </td>
+                                    string cellIdentity = columAlphaBet[columNumber] + rowNumber.ToString();
+                                    <td id="@cellIdentity">未完了</td>
+                                    columNumber++;
                                 }
                             </tr>
+                            rowNumber++;
+                            columNumber = 1;
                         }
 
                     </tbody>
