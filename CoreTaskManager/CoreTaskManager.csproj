@@ -33,6 +33,7 @@
     <Content Remove="appsettings.json" />
     <Content Remove="wwwroot\js\Progresses.js" />
   </ItemGroup>
+
   <ItemGroup>
     <None Include="wwwroot\js\Progresses.js" />
   </ItemGroup>

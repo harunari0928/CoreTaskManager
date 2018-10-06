@@ -65,7 +65,7 @@ namespace CoreTaskManager.Pages.TaskManager
 
             var tasks = from t in _context.Tasks
                         select t;
-            tasks = tasks.Where(t => t.Id == _progressId);
+            tasks = tasks.Where(t => t.ProgressId == _progressId);
 
             Participants = await participants.ToListAsync();
             ThisTasks = await tasks.ToListAsync();
@@ -129,13 +129,12 @@ namespace CoreTaskManager.Pages.TaskManager
         }
         public async Task<IActionResult> OnPostSetPariticipant()
         {
-            var _progressIdString = HttpContext.Session.GetString(SessionCurrentProgress);
+            var _progressId = HttpContext.Session.GetInt32(SessionCurrentProgress);
             var _currentPage = HttpContext.Session.GetInt32(SessionCurrentPage);
-            if (String.IsNullOrEmpty(_progressIdString))
+            if (_progressId == null)
             {
                 return RedirectToPage("../Progresses");
             }
-            int _progressId = int.Parse(_progressIdString);
             var participantInThisProgress = _context.Participants.Where(p => p.UserName == User.Identity.Name)
                 .Where(p => p.ProgressId == _progressId);
             if (participantInThisProgress.Count() != 0)
@@ -144,13 +143,13 @@ namespace CoreTaskManager.Pages.TaskManager
             }
             _context.Participants.Add(new Participant
             {
-                ProgressId = _progressId,
+                ProgressId = (int)_progressId,
                 UserName = User.Identity.Name,
                 CurrentProgress = 0
             });
 
             await _context.SaveChangesAsync();
-            return Redirect($"TaskManager/Index?progressIdString={_progressIdString}&currentPageString={_currentPage.ToString()}");
+            return Redirect($"TaskManager/Index?progressIdString={_progressId}&currentPageString={_currentPage.ToString()}");
         }
         public async Task<IActionResult> OnPostDeleteParticipant()
         {
