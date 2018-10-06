@@ -52,7 +52,7 @@ namespace CoreTaskManager.Pages.TaskManager
             HttpContext.Session.SetInt32(SessionCurrentProgress, _progressId);
 
             var _thisProgress = from p in _context.Progresses
-                           select p;
+                                select p;
             _thisProgress = _thisProgress.Where(p => p.Id == _progressId);
             if (_thisProgress.Count() == 0)
             {
@@ -127,6 +127,39 @@ namespace CoreTaskManager.Pages.TaskManager
             }
 
         }
+        public ActionResult OnPostUpdateProgress()
+        {
+            try
+            {
+                int _progressId = int.Parse(HttpContext.Session.GetString(SessionCurrentProgress));
+                int _numberOfTasks = int.Parse(HttpContext.Session.GetString(SessionNumberOfTasks));
+                string cellId = "";
+                {
+                    var stream = new MemoryStream();
+                    Request.Body.CopyTo(stream);
+                    stream.Position = 0;
+                    using (var reader = new StreamReader(stream))
+                    {
+                        string requestBody = reader.ReadToEnd();
+                        if (requestBody.Length <= 0)
+                        {
+                            return new JsonResult("failed");
+                        }
+                        var receiveData = JsonConvert.DeserializeObject<Dictionary<string, string>>(requestBody);
+                        cellId = receiveData["cellId"];
+                        char cellAlphabet = cellId.First();
+                        int cellInteger = int.Parse(cellId.Skip(1).ToString());
+                        // TODO:　続き
+                    }
+                }
+                return new JsonResult("success");
+            }
+            catch
+            {
+
+                return new JsonResult("serverError");
+            }
+        }
         public async Task<IActionResult> OnPostSetPariticipant()
         {
             var _progressId = HttpContext.Session.GetInt32(SessionCurrentProgress);
@@ -174,6 +207,27 @@ namespace CoreTaskManager.Pages.TaskManager
             }
 
             return Redirect($"TaskManager/Index?progressIdString={_progressId.ToString()}&currentPageString={_currentPage.ToString()}");
+        }
+
+        private Participant AcquireClickedParticipant(DbSet<Participant> displayedParticipants, int progressId, ColumAlphaBet alphabet)
+        {
+            var selectedParticipant = displayedParticipants.Where(p => p.ProgressId == progressId)
+                .ElementAt((int)alphabet);
+            return selectedParticipant;
+        }
+        private TaskModel AcquireClickedTask(DbSet<TaskModel> displayedTasks, int progressId, int rowNumber)
+        {
+            var selectedTask = displayedTasks.Where(p => p.ProgressId == progressId)
+                .Skip(rowNumber - 1).First();
+            return selectedTask;
+        }
+        enum ColumAlphaBet
+        {
+            A = 0,
+            B,
+            C,
+            D,
+            E
         }
     }
 }
