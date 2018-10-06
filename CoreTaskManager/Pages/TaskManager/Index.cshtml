@@ -18,7 +18,7 @@
         <div class="col-md-2">
             <br />
             @*まだタスクが登録されていないときのみタスク設定できる*@
-            @if (Model.ThisProgress.NumberOfItems == 0)
+            @if (Model.ThisProgress.NumberOfItems == 0 && Model.ThisProgress.UserName == User.Identity.Name)
             {
                 <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#registerNew" id="modalButton">
                     タスク設定
@@ -28,12 +28,11 @@
     </div>
     <br />
     @*参加者登録機能*@
-
     <div class="row">
         <div class="col-md-2">
             <form method="post">
                 @if (Model.Participants.Where(p => p.ProgressId == Model.ThisProgress.Id)
-                .Select(p => p.UserName).Contains(User.Identity.Name))
+.Select(p => p.UserName).Contains(User.Identity.Name))
                 {
                     <button type="button" class="btn btn-dark" data-toggle="modal" data-target="#leaveYes">
                         退出
@@ -63,6 +62,27 @@
                     <input type="submit" asp-page-handler="setpariticipant" class="btn btn-primary" value="参加" />
                 }
             </form>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            @if (Model.Participants.Count != 0)
+            {
+                <table>
+                    <thead>
+                        <tr>
+                            @foreach (var item in Model.Participants)
+                            {
+                                <th>
+                                    @Html.DisplayFor(modelItem => item.UserName)
+                                </th>
+                            }
+                        </tr>
+                    </thead>
+
+                </table>
+            }
+
         </div>
     </div>
 </div>

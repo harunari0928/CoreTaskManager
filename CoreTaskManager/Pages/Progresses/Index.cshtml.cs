@@ -36,28 +36,29 @@ namespace CoreTaskManager.Pages.Progresses
         public SelectList Genres { get; set; }
         public string ProgressGenre { get; set; }
         
-        public async Task OnGetAsync(string progressGenre, string searchString, string currentPage)
+        public async Task OnGetAsync(string progressGenre, string searchString, string currentPageString)
         {
-            if (String.IsNullOrEmpty(currentPage))
+            if (String.IsNullOrEmpty(currentPageString))
             {
                 HttpContext.Session.SetString(SessionCurrentPage, "1");
             }
             HttpContext.Session.SetString(SessionProgressGenre, progressGenre ?? "");
             HttpContext.Session.SetString(SessionSearchString, searchString ?? "");
             
-            var progresses = FilterProgresses(progressGenre, searchString);
+            var progresses = FilterProgresses(progressGenre, searchString, currentPageString);
             Progresses = await progresses.ToListAsync();
             Genres = new SelectList(await GenerateGenreList().ToListAsync());
 
         }
-        public async Task OnPostCurrentPage()
+        public async Task<IActionResult> OnPostCurrentPage()
         {
             var _genre = HttpContext.Session.GetString(SessionProgressGenre);
             var _searchString = HttpContext.Session.GetString(SessionSearchString);
             var _currentPage = HttpContext.Session.GetString(SessionCurrentPage);
             await OnGetAsync(_genre, _searchString, _currentPage);
+            return Redirect($"Progresses?progressGenre={ProgressGenre}&searchString={_searchString}&currentPageString={_currentPage}");
         }
-        public async Task OnPostNextPage()
+        public async Task<IActionResult> OnPostNextPage()
         {
             int _currentPage = int.Parse(HttpContext.Session.GetString(SessionCurrentPage) ?? "1");
             int _lastPage;
@@ -81,8 +82,9 @@ namespace CoreTaskManager.Pages.Progresses
             var _progresssGenre = HttpContext.Session.GetString(SessionProgressGenre);
             var _searchString = HttpContext.Session.GetString(SessionSearchString);
             await OnGetAsync(_progresssGenre, _searchString, _currentPage.ToString());
+            return Redirect($"Progresses?progressGenre={ProgressGenre}&searchString={_searchString}&currentPageString={_currentPage.ToString()}");
         }
-        public async Task OnPostPrevPage()
+        public async Task<IActionResult> OnPostPrevPage()
         {
             int _currentPage = int.Parse(HttpContext.Session.GetString(SessionCurrentPage) ?? "1");
             _currentPage--;
@@ -97,11 +99,12 @@ namespace CoreTaskManager.Pages.Progresses
             }
             var _progresssGenre = HttpContext.Session.GetString(SessionProgressGenre);
             var _searchString = HttpContext.Session.GetString(SessionSearchString);
-            var progresses = FilterProgresses(_progresssGenre, _searchString);
+            var progresses = FilterProgresses(_progresssGenre, _searchString, _currentPage.ToString());
             await OnGetAsync(_progresssGenre, _searchString, _currentPage.ToString());
+            return Redirect($"Progresses?progressGenre={ProgressGenre}&searchString={_searchString}&currentPageString={_currentPage}");
         }
 
-        private IQueryable<Progress> FilterProgresses(string progressGenre, string searchString)
+        private IQueryable<Progress> FilterProgresses(string progressGenre, string searchString, string currentPageString)
         {
             ViewData["CurrentPage"] = HttpContext.Session.GetString(SessionCurrentPage) ?? "";
             var progresses = from p in _context.Progresses
@@ -115,11 +118,12 @@ namespace CoreTaskManager.Pages.Progresses
             {
                 progresses = progresses.Where(x => x.Genre == progressGenre);
             }
-            HttpContext.Session.SetString(SessionNumOfProgresses, progresses.Count().ToString());
-            int _lastPage = progresses.Count() / _pageSize + 1;
-            int _currentPage = int.Parse(HttpContext.Session.GetString(SessionCurrentPage) ?? "1");
+            int _numOfProgresses = progresses.Count();
+            HttpContext.Session.SetString(SessionNumOfProgresses, _numOfProgresses.ToString());
+            int _lastPage = _numOfProgresses / _pageSize + 1;
+            int currentPage = int.Parse(currentPageString ?? "1");
             HttpContext.Session.SetString(SessionLastPage, _lastPage.ToString());            
-            return progresses = Paging(progresses, _currentPage, _pageSize);
+            return progresses = Paging(progresses, currentPage, _pageSize);
         }
         private IQueryable<string> GenerateGenreList()
         {

@@ -1,7 +1,7 @@
 ﻿
 window.onload = () => {
     let page = new Paging();
-}
+};
 
 
 class Paging {
@@ -13,6 +13,6 @@ class Paging {
 
     transToTaskManager(e) {
         let progressId = e.currentTarget.id;
-        window.location.href = "TaskManager/Index?progressId=" + progressId;
+        window.location.href = "TaskManager/Index?progressIdString=" + progressId;
     }
 }
