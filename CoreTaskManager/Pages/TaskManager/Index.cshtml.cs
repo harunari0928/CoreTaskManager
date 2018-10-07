@@ -157,15 +157,15 @@ namespace CoreTaskManager.Pages.TaskManager
                         cellId = receiveData["cellId"];
                     }
                 }
-                char _columAlphabet = cellId[0];
+                var columAlphabet = (ColumAlphaBet)Enum.Parse(typeof(ColumAlphaBet), cellId[0].ToString());
                 // TODO:修正
-                int _rowNumber = int.Parse(cellId.Skip(1).ToString());
-                int clickedTaskId = AcquireClickedTask(_context.Tasks, (int)_progressId, _rowNumber).Id;
-                var clickedParticipant = AcquireClickedParticipant(_context.Participants, (int)_progressId, (ColumAlphaBet)_columAlphabet);
+                int rowNumber = int.Parse(cellId.Substring(1, cellId.Length - 1));
+                int clickedTaskId = AcquireClickedTask(_context.Tasks, (int)_progressId, rowNumber).Id;
+                var clickedParticipant = AcquireClickedParticipant(_context.Participants, (int)_progressId, columAlphabet);
                 var clickedParticipantName = clickedParticipant.UserName;
                 int clickedParticipantCurrentProgress = clickedParticipant.CurrentProgress;
                 // ひとつ前のタスクが完了していなければ進捗更新できない
-                if (_rowNumber != clickedParticipantCurrentProgress + 1)
+                if (rowNumber != clickedParticipantCurrentProgress + 1)
                 {
                     return new JsonResult("faild");
                 }
@@ -237,11 +237,9 @@ namespace CoreTaskManager.Pages.TaskManager
 
             return Redirect($"TaskManager/Index?progressIdString={_progressId.ToString()}&currentPageString={_currentPage.ToString()}");
         }
-
         private Participant AcquireClickedParticipant(DbSet<Participant> displayedParticipants, int progressId, ColumAlphaBet alphabet)
         {
-            var selectedParticipant = displayedParticipants.Where(p => p.ProgressId == progressId)
-                .ElementAt((int)alphabet);
+            var selectedParticipant = displayedParticipants.Where(p => p.ProgressId == progressId).ToList()[(int)alphabet];
             return selectedParticipant;
         }
         private TaskModel AcquireClickedTask(DbSet<TaskModel> displayedTasks, int progressId, int rowNumber)
