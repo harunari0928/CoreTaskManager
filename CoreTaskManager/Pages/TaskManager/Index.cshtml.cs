@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.Authorization;
 using System.IO;
 using Newtonsoft.Json;
 using Microsoft.AspNetCore.Http;
+using System.Net;
+using System.Text;
 
 namespace CoreTaskManager.Pages.TaskManager
 {
@@ -42,13 +44,12 @@ namespace CoreTaskManager.Pages.TaskManager
 
         public async Task<IActionResult> OnGetAsync(string progressIdString, string currentPageString)
         {
-            // progressIdStringがnullであれば-1が代入
-            int progressId = int.Parse(progressIdString ?? "-1");
-            int currentPage = int.Parse(currentPageString ?? "1");
-            if (progressId == -1)
+            if (String.IsNullOrEmpty(progressIdString))
             {
                 return Redirect("./Progresses");
             }
+            int progressId = int.Parse(progressIdString);
+            int currentPage = int.Parse(currentPageString ?? "1");
             HttpContext.Session.SetInt32(SessionCurrentPage, currentPage);
             HttpContext.Session.SetInt32(SessionCurrentProgress, progressId);
 
@@ -69,10 +70,10 @@ namespace CoreTaskManager.Pages.TaskManager
             tasks = tasks.Where(t => t.ProgressId == progressId);
 
             var achievedtasks = from a in _context.AchievedTasks
-                               select a;
+                                select a;
             achievedtasks = achievedtasks.Where(a => a.ProgressId == progressId);
 
-            
+
             Participants = await participants.ToListAsync();
             ThisTasks = await tasks.ToListAsync();
             ThisProgress = await _thisProgress.FirstAsync();
@@ -140,9 +141,9 @@ namespace CoreTaskManager.Pages.TaskManager
         {
             try
             {
-                int? _progressId = HttpContext.Session.GetInt32(SessionCurrentProgress);
-                int? _numberOfTasks = HttpContext.Session.GetInt32(SessionNumberOfTasks);
-                if (_progressId == null || _numberOfTasks == null)
+                int? progressId = HttpContext.Session.GetInt32(SessionCurrentProgress);
+                int? numberOfTasks = HttpContext.Session.GetInt32(SessionNumberOfTasks);
+                if (progressId == null || numberOfTasks == null)
                 {
                     return new JsonResult("serverError");
                 }
@@ -164,29 +165,47 @@ namespace CoreTaskManager.Pages.TaskManager
                 }
                 var columAlphabet = (ColumAlphaBet)Enum.Parse(typeof(ColumAlphaBet), cellId[0].ToString());
                 int rowNumber = int.Parse(cellId.Substring(1, cellId.Length - 1));
-                int clickedTaskId = AcquireClickedTask(_context.Tasks, (int)_progressId, rowNumber).Id;
-                var clickedParticipant = AcquireClickedParticipant(_context.Participants, (int)_progressId, columAlphabet);
+                var clickedTask = AcquireClickedTask(_context.Tasks, (int)progressId, rowNumber);
+                int clickedTaskId = clickedTask.Id;
+                var clickedParticipant = AcquireClickedParticipant(_context.Participants, (int)progressId, columAlphabet);
                 var clickedParticipantName = clickedParticipant.UserName;
+                int clickedParticipantCurrentProgress = clickedParticipant.CurrentProgress;
+
                 // 進捗更新申請した人とユーザが一致しなければ処理中断
                 if (User.Identity.Name != clickedParticipantName)
                 {
                     return new JsonResult("failed");
                 }
-                int clickedParticipantCurrentProgress = clickedParticipant.CurrentProgress;
                 // ひとつ前のタスクが完了していなければ進捗更新できない
-                if (rowNumber != clickedParticipantCurrentProgress + 1)
+                else if (rowNumber != clickedParticipantCurrentProgress + 1)
                 {
                     return new JsonResult("failed");
                 }
-                _context.AchievedTasks.Add(new AchievedTask
+                // すでに登録されている場合も処理中断
+                else if (_context.AchievedTasks.Where(a => a.TaskId == clickedTaskId)
+                    .Where(a => a.UserName == clickedParticipantName).Count() > 0)
                 {
-                    ProgressId = (int)_progressId,
+                    return new JsonResult("failed");
+                }
+
+                var achievdTask = new AchievedTask
+                {
+                    ProgressId = (int)progressId,
                     TaskId = clickedTaskId,
                     UserName = clickedParticipantName,
                     AchievedDateTime = DateTime.Now,
                     IsAuthorized = false
-                });
+                };
+
+                var thisProgress = _context.Progresses.Where(p => p.Id == progressId).First();
+                if (!String.IsNullOrEmpty(thisProgress.SlackAppUrl))
+                {
+                    NortificationToOutside(thisProgress, clickedTask, achievdTask);
+                }
+
+                _context.AchievedTasks.Add(achievdTask);
                 _context.SaveChanges();
+
                 var result = new Dictionary<string, string>
                 {
                     { "dateTime", DateTime.Now.ToString() }
@@ -256,6 +275,31 @@ namespace CoreTaskManager.Pages.TaskManager
             var selectedTask = displayedTasks.Where(p => p.ProgressId == progressId)
                 .Skip(rowNumber - 1).First();
             return selectedTask;
+        }
+        private void NortificationToOutside(Progress progress, TaskModel thisTask, AchievedTask achievedTask)
+        {
+            var wc = new WebClient();
+            // TODO 承認作業用url
+            var sendStatement = new StringBuilder();
+            sendStatement.AppendLine("以下のurl先で承認作業をお願いします");
+            sendStatement.AppendLine("");
+            sendStatement.AppendLine("<申請者>");
+            sendStatement.AppendLine(achievedTask.UserName);
+            sendStatement.AppendLine("");
+            sendStatement.AppendLine("<タスク名>");
+            sendStatement.AppendLine("■" + progress.Title);
+            sendStatement.AppendLine("  -" + thisTask.TaskName);
+            var sendData = JsonConvert.SerializeObject(new
+            {
+                text = sendStatement.ToString(),
+                icon_emoji = ":cyclone:",
+                username = "承認依頼bot"
+            });
+
+            wc.Headers.Add(HttpRequestHeader.ContentType, "application/json;charset=UTF-8");
+            wc.Encoding = Encoding.UTF8;
+
+            wc.UploadString(progress.SlackAppUrl, sendData);
         }
         enum ColumAlphaBet
         {
