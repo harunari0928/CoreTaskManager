@@ -35,7 +35,7 @@ namespace CoreTaskManager.Pages.Progresses
         public IList<Progress> Progresses { get; set; }
         public SelectList Genres { get; set; }
         public string ProgressGenre { get; set; }
-        
+
         public async Task OnGetAsync(string progressGenre, string searchString, string currentPageString)
         {
             if (String.IsNullOrEmpty(currentPageString))
@@ -44,7 +44,7 @@ namespace CoreTaskManager.Pages.Progresses
             }
             HttpContext.Session.SetString(SessionProgressGenre, progressGenre ?? "");
             HttpContext.Session.SetString(SessionSearchString, searchString ?? "");
-            
+
             var progresses = FilterProgresses(progressGenre, searchString, currentPageString);
             Progresses = await progresses.ToListAsync();
             Genres = new SelectList(await GenerateGenreList().ToListAsync());
@@ -60,33 +60,29 @@ namespace CoreTaskManager.Pages.Progresses
         }
         public async Task<IActionResult> OnPostNextPage()
         {
-
+            // sessionページ数がnullであれば1を代入
             int currentPage = 1;
             if (HttpContext.Session.GetInt32(SessionCurrentPage) != null)
             {
                 currentPage = (int)HttpContext.Session.GetInt32(SessionCurrentPage);
             }
             int lastPage;
-            if (HttpContext.Session.GetInt32(SessionCurrentPage) != null)
+            if (HttpContext.Session.GetInt32(SessionLastPage) != null)
             {
-                lastPage = _context.Progresses.Count() / _pageSize + 1;
+                lastPage = (int)HttpContext.Session.GetInt32(SessionLastPage);
             }
             else
             {
-                lastPage = 1;
-                if (HttpContext.Session.GetInt32(SessionLastPage) != null)
-                {
-                    lastPage = (int)HttpContext.Session.GetInt32(SessionLastPage);
-                }
-                currentPage++;
+                lastPage = _context.Progresses.Count() / _pageSize + 1;
             }
+            currentPage++;
             if (currentPage > lastPage)
             {
                 currentPage = lastPage;
             }
             else
             {
-                HttpContext.Session.SetString(SessionCurrentPage, currentPage.ToString());
+                HttpContext.Session.SetInt32(SessionCurrentPage, currentPage);
             }
             var _progresssGenre = HttpContext.Session.GetString(SessionProgressGenre);
             var _searchString = HttpContext.Session.GetString(SessionSearchString);
@@ -95,27 +91,38 @@ namespace CoreTaskManager.Pages.Progresses
         }
         public async Task<IActionResult> OnPostPrevPage()
         {
-            int _currentPage = int.Parse(HttpContext.Session.GetString(SessionCurrentPage) ?? "1");
-            _currentPage--;
-            if (_currentPage < 1)
+            int currentPage = 1;
+            if (HttpContext.Session.GetInt32(SessionCurrentPage) != null)
             {
-                _currentPage = 1;
-                HttpContext.Session.SetString(SessionCurrentPage, "1");
+                currentPage = (int)HttpContext.Session.GetInt32(SessionCurrentPage);
+            }
+            currentPage--;
+            if (currentPage < 1)
+            {
+                currentPage = 1;
+                HttpContext.Session.SetInt32(SessionCurrentPage, 1);
             }
             else
             {
-                HttpContext.Session.SetString(SessionCurrentPage,_currentPage.ToString());
+                HttpContext.Session.SetInt32(SessionCurrentPage, currentPage);
             }
-            var _progresssGenre = HttpContext.Session.GetString(SessionProgressGenre);
-            var _searchString = HttpContext.Session.GetString(SessionSearchString);
-            var progresses = FilterProgresses(_progresssGenre, _searchString, _currentPage.ToString());
-            await OnGetAsync(_progresssGenre, _searchString, _currentPage.ToString());
-            return Redirect($"Progresses?progressGenre={ProgressGenre}&searchString={_searchString}&currentPageString={_currentPage}");
+            var progresssGenre = HttpContext.Session.GetString(SessionProgressGenre);
+            var searchString = HttpContext.Session.GetString(SessionSearchString);
+            var progresses = FilterProgresses(progresssGenre, searchString, currentPage.ToString());
+            await OnGetAsync(progresssGenre, searchString, currentPage.ToString());
+            return Redirect($"Progresses?progressGenre={ProgressGenre}&searchString={searchString}&currentPageString={currentPage}");
         }
 
         private IQueryable<Progress> FilterProgresses(string progressGenre, string searchString, string currentPageString)
         {
-            ViewData["CurrentPage"] = HttpContext.Session.GetString(SessionCurrentPage) ?? "";
+            int currentPage = 1;
+            ViewData["CurrentPage"] = "1";
+            if (!String.IsNullOrEmpty(currentPageString))
+            {
+                currentPage = int.Parse(currentPageString);
+                ViewData["CurrentPage"] = currentPageString;
+            }
+
             var progresses = from p in _context.Progresses
                              select p;
 
@@ -127,10 +134,10 @@ namespace CoreTaskManager.Pages.Progresses
             {
                 progresses = progresses.Where(x => x.Genre == progressGenre);
             }
+
             HttpContext.Session.SetInt32(SessionNumOfProgresses, progresses.Count());
             int lastPage = progresses.Count() / _pageSize + 1;
-            int currentPage = int.Parse(currentPageString ?? "1");
-            HttpContext.Session.SetInt32(SessionLastPage, lastPage);            
+            HttpContext.Session.SetInt32(SessionLastPage, lastPage);
             return progresses = Paging(progresses, currentPage, _pageSize);
         }
         private IQueryable<string> GenerateGenreList()
