@@ -38,39 +38,45 @@ namespace CoreTaskManager.Pages.TaskManager
         public Participant ThisParticipant { get; set; }
         [BindProperty]
         public Progress ThisProgress { get; set; }
+        public IList<AchievedTask> AchivedInThisProgress { get; set; }
 
         public async Task<IActionResult> OnGetAsync(string progressIdString, string currentPageString)
         {
             // progressIdStringがnullであれば-1が代入
-            int _progressId = int.Parse(progressIdString ?? "-1");
-            int _currentPage = int.Parse(currentPageString ?? "1");
-            if (_progressId == -1)
+            int progressId = int.Parse(progressIdString ?? "-1");
+            int currentPage = int.Parse(currentPageString ?? "1");
+            if (progressId == -1)
             {
-                return Redirect("../Progresses");
+                return Redirect("./Progresses");
             }
-            HttpContext.Session.SetInt32(SessionCurrentPage, _currentPage);
-            HttpContext.Session.SetInt32(SessionCurrentProgress, _progressId);
+            HttpContext.Session.SetInt32(SessionCurrentPage, currentPage);
+            HttpContext.Session.SetInt32(SessionCurrentProgress, progressId);
 
             var _thisProgress = from p in _context.Progresses
                                 select p;
-            _thisProgress = _thisProgress.Where(p => p.Id == _progressId);
+            _thisProgress = _thisProgress.Where(p => p.Id == progressId);
             if (_thisProgress.Count() == 0)
             {
-                return Redirect("../Progresses");
+                return Redirect("./Progresses");
             }
             var participants = from p in _context.Participants
                                select p;
-            participants = participants.Where(p => p.ProgressId == _progressId);
-            participants = participants.Take(_pageSize).Skip((_currentPage - 1) * _pageSize);
+            participants = participants.Where(p => p.ProgressId == progressId);
+            participants = participants.Take(_pageSize).Skip((currentPage - 1) * _pageSize);
 
             var tasks = from t in _context.Tasks
                         select t;
-            tasks = tasks.Where(t => t.ProgressId == _progressId);
+            tasks = tasks.Where(t => t.ProgressId == progressId);
 
+            var achievedtasks = from a in _context.AchievedTasks
+                               select a;
+            achievedtasks = achievedtasks.Where(a => a.ProgressId == progressId);
+
+            
             Participants = await participants.ToListAsync();
             ThisTasks = await tasks.ToListAsync();
             ThisProgress = await _thisProgress.FirstAsync();
-
+            AchivedInThisProgress = await achievedtasks.ToListAsync();
             HttpContext.Session.SetInt32(SessionNumberOfTasks, ThisProgress.NumberOfItems);
             return Page();
         }
@@ -99,7 +105,6 @@ namespace CoreTaskManager.Pages.TaskManager
                             {
                                 var receiveString = receiveData[$"task{i.ToString()}"];
                                 // すでにタスクが登録されていた場合は登録できない
-
                                 if (_numberOfTasks > 0)
                                 {
                                     return new JsonResult("wrongString");
@@ -158,16 +163,20 @@ namespace CoreTaskManager.Pages.TaskManager
                     }
                 }
                 var columAlphabet = (ColumAlphaBet)Enum.Parse(typeof(ColumAlphaBet), cellId[0].ToString());
-                // TODO:修正
                 int rowNumber = int.Parse(cellId.Substring(1, cellId.Length - 1));
                 int clickedTaskId = AcquireClickedTask(_context.Tasks, (int)_progressId, rowNumber).Id;
                 var clickedParticipant = AcquireClickedParticipant(_context.Participants, (int)_progressId, columAlphabet);
                 var clickedParticipantName = clickedParticipant.UserName;
+                // 進捗更新申請した人とユーザが一致しなければ処理中断
+                if (User.Identity.Name != clickedParticipantName)
+                {
+                    return new JsonResult("failed");
+                }
                 int clickedParticipantCurrentProgress = clickedParticipant.CurrentProgress;
                 // ひとつ前のタスクが完了していなければ進捗更新できない
                 if (rowNumber != clickedParticipantCurrentProgress + 1)
                 {
-                    return new JsonResult("faild");
+                    return new JsonResult("failed");
                 }
                 _context.AchievedTasks.Add(new AchievedTask
                 {
