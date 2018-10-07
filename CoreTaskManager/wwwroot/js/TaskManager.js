@@ -140,6 +140,10 @@ class ProgressTable {
         this.achievedDateTime;
         $('tbody>tr').on('click', e => {
             console.log(e.target.id);
+            // タスク名のセルが押されたときは何もしない
+            if (e.target.id === "taskName") {
+                return;
+            }
             this.registerProgress(e.target.id);
         });
     }
@@ -171,7 +175,6 @@ class ProgressTable {
             }
         });
     }
-
     changeCellDisplay(cell, achivedDateTime) {
         $('#' + cell).css('background-color', 'yellow');
         $('#' + cell).text('【未認証】' + achivedDateTime);

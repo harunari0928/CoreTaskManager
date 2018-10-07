@@ -41,7 +41,7 @@
     th + th, td {
         border-left: 1px solid #666;
     }
-</style>        
+</style>
 <h2>@ViewData["Title"]</h2>
 @*ボタン群*@
 <div class="container">
@@ -124,30 +124,37 @@
                         }
                         @foreach (var task in Model.ThisTasks)
                         {
-                        <tr>
-                            <td style="background-color:#3f3f3f;color:white">@Html.DisplayFor(modelItem => task.TaskName)</td>
-                            @foreach (var item in Model.Participants)
-                            {
-                                var achived = Model.AchivedInThisProgress.ToList();
-                                achived = achived.Where(a => a.TaskId == task.Id)
-                                        .Where(a => a.UserName == item.UserName).ToList();
-                                string cellId = columAlphaBet[columNumber] + rowNumber.ToString();
-                                
-                                if (achived.Count == 0)
+                            <tr>
+                                <td id="taskName" style="background-color:#3f3f3f;color:white">
+                                    @rowNumber.ToString().
+                                    @Html.DisplayFor(modelItem => task.TaskName)
+                                </td>
+                                @foreach (var item in Model.Participants)
                                 {
-                                    <td id="@cellId" style="background-color:darkgray"></td>
+                                    var achived = Model.AchivedInThisProgress.ToList();
+                                    achived = achived.Where(a => a.TaskId == task.Id)
+                                            .Where(a => a.UserName == item.UserName).ToList();
+                                    string cellId = columAlphaBet[columNumber] + rowNumber.ToString();
+
+                                    if (achived.Count == 0)
+                                    {
+                                        <td id="@cellId" style="background-color:darkgray"></td>
+                                    }
+                                    else if (achived.First().IsAuthorized)
+                                    {
+                                        <td id="@cellId" style="background-color:greenyellow">
+                                            @achived.First().AchievedDateTime.ToString()
+                                        </td>
+                                    }
+                                    else
+                                    {
+                                        <td id="@cellId" style="background-color:yellow">
+                                            【未認証】<br />@achived.First().AchievedDateTime.ToString()
+                                        </td>
+                                    }
+                                    columNumber++;
                                 }
-                                else if (achived.First().IsAuthorized)
-                                {
-                                    <td id="@cellId" style="background-color:greenyellow">@achived.First().AchievedDateTime.ToString()</td>
-                                }
-                                else
-                                {
-                                    <td id="@cellId" style="background-color:yellow">【未認証】<br/>@achived.First().AchievedDateTime.ToString()</td>
-                                }
-                                columNumber++;
-                            }
-                        </tr>
+                            </tr>
                             rowNumber++;
                             columNumber = 1;
                         }
@@ -196,3 +203,4 @@
 @section Scripts {
     <script src="~/js/TaskManager.js"></script>
 }
+
