@@ -1,0 +1,34 @@
+﻿.alert1 {
+    color: red;
+}
+
+table {
+    margin: 0 auto;
+    border-radius: 10px;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border: 1px solid #666;
+    border-spacing: 0;
+    overflow: hidden;
+}
+
+td, th {
+    border-bottom: 1px solid #666;
+}
+
+td, th {
+    padding: 10px;
+}
+
+th {
+    background: #EFEFEF;
+}
+
+table tbody tr:last-child th,
+table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+th + th, td {
+    border-left: 1px solid #666;
+}
