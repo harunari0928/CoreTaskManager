@@ -10,7 +10,38 @@
     .alert1 {
         color: red;
     }
-</style>
+
+    table {
+        margin: 0 auto;
+        border-radius: 10px;
+        -webkit-border-radius: 10px;
+        -moz-border-radius: 10px;
+        border: 1px solid #666;
+        border-spacing: 0;
+        overflow: hidden;
+    }
+
+    td, th {
+        border-bottom: 1px solid #666;
+    }
+
+    td, th {
+        padding: 10px;
+    }
+
+    th {
+        background: #EFEFEF;
+    }
+
+    table tbody tr:last-child th,
+    table tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    th + th, td {
+        border-left: 1px solid #666;
+    }
+</style>        
 <h2>@ViewData["Title"]</h2>
 @*ボタン群*@
 <div class="container">
@@ -64,17 +95,19 @@
             </form>
         </div>
     </div>
+    <br />
     <div class="row">
+        @*進捗一覧テーブル*@
         <div class="col-12">
             @if (Model.Participants.Count != 0)
             {
                 <table>
                     <thead>
                         <tr>
-                            <th></th>
+                            <th style="background-color:#3f3f3f;color:white">　　　　　　　</th>
                             @foreach (var item in Model.Participants)
                             {
-                                <th>
+                                <th style="background-color:#3f3f3f;color:white">
                                     @{
                                         var userName = item.UserName.Split('@')[0];
                                     }
@@ -91,16 +124,30 @@
                         }
                         @foreach (var task in Model.ThisTasks)
                         {
-                            <tr>
-                                <td>@Html.DisplayFor(modelItem => task.TaskName)</td>
-                                @*TODO: タスクが完了しているか否かのデータを持ってくる*@
-                                @foreach (var item in Model.Participants)
+                        <tr>
+                            <td style="background-color:#3f3f3f;color:white">@Html.DisplayFor(modelItem => task.TaskName)</td>
+                            @foreach (var item in Model.Participants)
+                            {
+                                var achived = Model.AchivedInThisProgress.ToList();
+                                achived = achived.Where(a => a.TaskId == task.Id)
+                                        .Where(a => a.UserName == item.UserName).ToList();
+                                string cellId = columAlphaBet[columNumber] + rowNumber.ToString();
+                                
+                                if (achived.Count == 0)
                                 {
-                                    string cellIdentity = columAlphaBet[columNumber] + rowNumber.ToString();
-                                    <td id="@cellIdentity">未完了</td>
-                                    columNumber++;
+                                    <td id="@cellId" style="background-color:darkgray"></td>
                                 }
-                            </tr>
+                                else if (achived.First().IsAuthorized)
+                                {
+                                    <td id="@cellId" style="background-color:greenyellow">@achived.First().AchievedDateTime.ToString()</td>
+                                }
+                                else
+                                {
+                                    <td id="@cellId" style="background-color:yellow">【未認証】<br/>@achived.First().AchievedDateTime.ToString()</td>
+                                }
+                                columNumber++;
+                            }
+                        </tr>
                             rowNumber++;
                             columNumber = 1;
                         }
