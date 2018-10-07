@@ -137,10 +137,11 @@ class OperateTaskForm {
 
 class ProgressTable {
     constructor() {
+        this.achievedDateTime;
         $('tbody>tr').on('click', e => {
             console.log(e.target.id);
-            this.registerProgress(e.target.id)
-        })
+            this.registerProgress(e.target.id);
+        });
     }
 
     registerProgress(cell) {
@@ -156,19 +157,24 @@ class ProgressTable {
             contentType: "application/json; charset=utf-8",
             dataType: "json",
             success: response => {
-                console.log("aaa");
                 if (response === "serverError") {
                     return alert("サーバでエラーが発生しました");
                 }
                 if (response === "failed") {
                     return;
                 }
+                this.changeCellDisplay(cell, JSON.parse(response).dateTime);
                 console.log("success");
             },
             failure: response => {
                 alert("通信に失敗しました");
             }
         });
+    }
+
+    changeCellDisplay(cell, achivedDateTime) {
+        $('#' + cell).css('background-color', 'yellow');
+        $('#' + cell).text('【未認証】' + achivedDateTime);
     }
 }
 
