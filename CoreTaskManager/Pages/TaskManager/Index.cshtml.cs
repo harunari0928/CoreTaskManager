@@ -78,8 +78,12 @@ namespace CoreTaskManager.Pages.TaskManager
         {
             try
             {
-                int _progressId = int.Parse(HttpContext.Session.GetString(SessionCurrentProgress));
-                int _numberOfTasks = int.Parse(HttpContext.Session.GetString(SessionNumberOfTasks));
+                int? _progressId = HttpContext.Session.GetInt32(SessionCurrentProgress);
+                int? _numberOfTasks = HttpContext.Session.GetInt32(SessionNumberOfTasks);
+                if (_progressId == null || _numberOfTasks == null)
+                {
+                    return new JsonResult("serverError");
+                }
                 var Tasks = new List<TaskModel>();
                 {
                     var stream = new MemoryStream();
@@ -107,7 +111,7 @@ namespace CoreTaskManager.Pages.TaskManager
 
                                 Tasks.Add(new TaskModel
                                 {
-                                    ProgressId = _progressId,
+                                    ProgressId = (int)_progressId,
                                     TaskName = receiveString
                                 });
                             }
@@ -131,8 +135,12 @@ namespace CoreTaskManager.Pages.TaskManager
         {
             try
             {
-                int _progressId = int.Parse(HttpContext.Session.GetString(SessionCurrentProgress));
-                int _numberOfTasks = int.Parse(HttpContext.Session.GetString(SessionNumberOfTasks));
+                int? _progressId = HttpContext.Session.GetInt32(SessionCurrentProgress);
+                int? _numberOfTasks = HttpContext.Session.GetInt32(SessionNumberOfTasks);
+                if (_progressId == null || _numberOfTasks == null)
+                {
+                    return new JsonResult("serverError");
+                }
                 string cellId = "";
                 {
                     var stream = new MemoryStream();
@@ -147,16 +155,37 @@ namespace CoreTaskManager.Pages.TaskManager
                         }
                         var receiveData = JsonConvert.DeserializeObject<Dictionary<string, string>>(requestBody);
                         cellId = receiveData["cellId"];
-                        char cellAlphabet = cellId.First();
-                        int cellInteger = int.Parse(cellId.Skip(1).ToString());
-                        // TODO:　続き
                     }
                 }
-                return new JsonResult("success");
+                char _columAlphabet = cellId[0];
+                // TODO:修正
+                int _rowNumber = int.Parse(cellId.Skip(1).ToString());
+                int clickedTaskId = AcquireClickedTask(_context.Tasks, (int)_progressId, _rowNumber).Id;
+                var clickedParticipant = AcquireClickedParticipant(_context.Participants, (int)_progressId, (ColumAlphaBet)_columAlphabet);
+                var clickedParticipantName = clickedParticipant.UserName;
+                int clickedParticipantCurrentProgress = clickedParticipant.CurrentProgress;
+                // ひとつ前のタスクが完了していなければ進捗更新できない
+                if (_rowNumber != clickedParticipantCurrentProgress + 1)
+                {
+                    return new JsonResult("faild");
+                }
+                _context.AchievedTasks.Add(new AchievedTask
+                {
+                    ProgressId = (int)_progressId,
+                    TaskId = clickedTaskId,
+                    UserName = clickedParticipantName,
+                    AchievedDateTime = DateTime.Now,
+                    IsAuthorized = false
+                });
+                _context.SaveChanges();
+                var result = new Dictionary<string, string>
+                {
+                    { "dateTime", DateTime.Now.ToString() }
+                };
+                return new JsonResult(JsonConvert.SerializeObject(result));
             }
             catch
             {
-
                 return new JsonResult("serverError");
             }
         }

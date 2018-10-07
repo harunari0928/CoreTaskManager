@@ -113,11 +113,11 @@ class OperateTaskForm {
             contentType: "application/json; charset=utf-8",
             dataType: "json",
             success: response => {
-                if (response.d === "serverError") {
+                if (response === "serverError") {
                     alert("サーバでエラーが発生しました");
                     transmitSuccessFlag = false;
                 }
-                if (response.d === "wrongString") {
+                if (response === "wrongString") {
                     alert("不正な値が入力されました");
                     transmitSuccessFlag = false;
                 }
@@ -156,12 +156,14 @@ class ProgressTable {
             contentType: "application/json; charset=utf-8",
             dataType: "json",
             success: response => {
-                if (response.d === "serverError") {
-                    alert("サーバでエラーが発生しました");
+                console.log("aaa");
+                if (response === "serverError") {
+                    return alert("サーバでエラーが発生しました");
                 }
-                if (response.d === "wrongString") {
-                    alert("不正な値が入力されました");
+                if (response === "failed") {
+                    return;
                 }
+                console.log("success");
             },
             failure: response => {
                 alert("通信に失敗しました");
