@@ -37,7 +37,7 @@ namespace CoreTaskManager
             services.Configure<CookiePolicyOptions>(options =>
             {
                 // This lambda determines whether user consent for non-essential cookies is needed for a given request.
-                options.CheckConsentNeeded = context => true;
+                options.CheckConsentNeeded = context => false;
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
@@ -112,13 +112,20 @@ namespace CoreTaskManager
                 });
             #endregion
 
+            services.AddDistributedMemoryCache();
+
+            services.AddSession(options =>
+            {
+                // Set a short timeout for easy testing.
+                options.IdleTimeout = TimeSpan.FromMinutes(10);
+                options.Cookie.HttpOnly = true;
+            });
+
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             services.AddDbContext<CoreTaskManagerContext>(options =>
                     options.UseSqlServer(Configuration.GetConnectionString("CoreTaskManagerContext")));
 
-            services.AddDistributedMemoryCache();
-            services.AddSession();
             services.AddAntiforgery(o => o.HeaderName = "XSRF-TOKEN");
         }
 
@@ -143,7 +150,9 @@ namespace CoreTaskManager
 
             app.UseAuthentication();
 
-            app.UseMvc();
+            app.UseSession();
+
+            app.UseMvcWithDefaultRoute();
         }
     }
 }
