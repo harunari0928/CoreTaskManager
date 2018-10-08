@@ -57,7 +57,7 @@ namespace CoreTaskManager.Pages.TaskManager
             thisProgress = thisProgress.Where(p => p.Id == progressId);
             if (thisProgress.Count() == 0)
             {
-                return Redirect("./Progresses");
+                return Redirect("../Progresses");
             }
             var participants = from p in _context.Participants
                                select p;
@@ -291,7 +291,11 @@ namespace CoreTaskManager.Pages.TaskManager
             var wc = new WebClient();
             // TODO 承認作業用url
             var sendStatement = new StringBuilder();
+            sendStatement.AppendLine("<!channel>");
+            sendStatement.AppendLine($"{progress.UserName}さん");
             sendStatement.AppendLine("以下のurl先で承認作業をお願いします");
+            var ownerPageUrl = $"{Request.Scheme}://{Request.Host}/OwnerPage?progressIdString={progress.Id}";
+            sendStatement.AppendLine(ownerPageUrl);
             sendStatement.AppendLine("");
             sendStatement.AppendLine("<申請者>");
             sendStatement.AppendLine(achievedTask.UserName);
