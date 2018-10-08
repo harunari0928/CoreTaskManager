@@ -6,6 +6,7 @@
 @{
     ViewData["Title"] = Model.ThisProgress.Title;
 }
+
 <link href="~/css/TaskManagercss.css" rel="stylesheet" />
 <h2>@ViewData["Title"]</h2>
 @*ボタン群*@
@@ -33,25 +34,6 @@
                     <button type="button" class="btn btn-dark" data-toggle="modal" data-target="#leaveYes">
                         退出
                     </button>
-                    <div class="modal fade" id="leaveYes" tabindex="-1" role="dialog" aria-labelledby="#leaveYesTitle" aria-hidden="true">
-                        <div class="modal-dialog" role="document">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="leaveYesTitle">確認</h5>
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="閉じる">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
-                                </div>
-                                <div class="modal-body">
-                                    <label>本当に退出しますか？</label>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">いいえ</button>
-                                    <input type="submit" asp-page-handler="deleteparticipant" class="btn btn-danger" value="はい" />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 }
                 else
                 {
@@ -89,46 +71,46 @@
                         }
                         @foreach (var task in Model.ThisTasks)
                         {
-                        <tr>
-                            <td id="taskName" style="background-color:#3f3f3f;color:white">
-                                @rowNumber.ToString().
-                                @Html.DisplayFor(modelItem => task.TaskName)
-                            </td>
-                            @foreach (var item in Model.Participants)
-                            {
-                                var achived = Model.AchivedInThisProgress.ToList();
-                                achived = achived.Where(a => a.TaskId == task.Id)
-                                        .Where(a => a.UserName == item.UserName).ToList();
-                                string cellId = columAlphaBet[columNumber] + rowNumber.ToString();
-
-                                if (achived.Count == 0)
+                            <tr>
+                                <td id="taskName" style="background-color:#3f3f3f;color:white">
+                                    @rowNumber.ToString().
+                                    @Html.DisplayFor(modelItem => task.TaskName)
+                                </td>
+                                @foreach (var item in Model.Participants)
                                 {
-                                    //ログインしているユーザ自身のセルとそれ以外を分ける
-                                    int currentProgress = item.CurrentProgress;
-                                    if (item.UserName == User.Identity.Name && currentProgress + 1 == rowNumber)
+                                    var achived = Model.AchivedInThisProgress.ToList();
+                                    achived = achived.Where(a => a.TaskId == task.Id)
+                                            .Where(a => a.UserName == item.UserName).ToList();
+                                    string cellId = columAlphaBet[columNumber] + rowNumber.ToString();
+
+                                    if (achived.Count == 0)
                                     {
-                                        <td id="@cellId" style="background-color:darkgray" data-toggle="modal" data-target="#approvalRequest"></td>
+                                        //ログインしているユーザ自身のセルとそれ以外を分ける
+                                        int currentProgress = item.CurrentProgress;
+                                        if (item.UserName == User.Identity.Name && currentProgress + 1 == rowNumber)
+                                        {
+                                            <td id="@cellId" style="background-color:darkgray" data-toggle="modal" data-target="#approvalRequest"></td>
+                                        }
+                                        else
+                                        {
+                                            <td id="@cellId" style="background-color:darkgray"></td>
+                                        }
+                                    }
+                                    else if (achived.First().IsAuthorized)
+                                    {
+                                        <td id="@cellId" style="background-color:greenyellow">
+                                            @achived.First().AchievedDateTime.ToString()
+                                        </td>
                                     }
                                     else
                                     {
-                                        <td id="@cellId" style="background-color:darkgray"></td>
+                                        <td id="@cellId" style="background-color:yellow">
+                                            【未認証】<br />@achived.First().AchievedDateTime.ToString()
+                                        </td>
                                     }
+                                    columNumber++;
                                 }
-                                else if (achived.First().IsAuthorized)
-                                {
-                                    <td id="@cellId" style="background-color:greenyellow">
-                                        @achived.First().AchievedDateTime.ToString()
-                                    </td>
-                                }
-                                else
-                                {
-                                    <td id="@cellId" style="background-color:yellow">
-                                        【未認証】<br />@achived.First().AchievedDateTime.ToString()
-                                    </td>
-                                }
-                                columNumber++;
-                            }
-                        </tr>
+                            </tr>
                             rowNumber++;
                             columNumber = 1;
                         }
@@ -141,7 +123,26 @@
         </div>
     </div>
 </div>
-
+@*退出確認*@
+<div class="modal fade" id="leaveYes" tabindex="-1" role="dialog" aria-labelledby="#leaveYesTitle" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="leaveYesTitle">確認</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="閉じる">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <label>本当に退出しますか？</label>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">いいえ</button>
+                <form method="post"><input type="submit" asp-page-handler="deleteparticipant" class="btn btn-danger" value="はい" /></form>
+            </div>
+        </div>
+    </div>
+</div>
 @*タスク登録モーダル*@
 <div class="modal fade" id="registerNew" tabindex="-1" role="dialog" aria-labelledby="#registerNewTitle" aria-hidden="true">
     <div class="modal-dialog" role="document">
@@ -190,7 +191,7 @@
                 <textarea rows="5" cols="20" class="form-control" id="aSingleWord"></textarea>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-danger" id="approvalRequestButton" >承認依頼</button>
+                <button class="btn btn-danger" id="approvalRequestButton">承認依頼</button>
                 <button class="btn btn-secondary" data-dismiss="modal">キャンセル</button>
             </div>
         </div>
