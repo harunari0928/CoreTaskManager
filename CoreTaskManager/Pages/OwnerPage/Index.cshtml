@@ -1,0 +1,14 @@
+﻿@page
+@model CoreTaskManager.Pages.OwnerPage.IndexModel
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h2>管理者画面</h2>
+
+<div id="unappliedTaskTable"></div>
+@Html.AntiForgeryToken()
+@section Scripts {
+    <script src="~/js/OwnerPage.js"></script>
+}

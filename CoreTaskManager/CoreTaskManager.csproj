@@ -30,8 +30,26 @@
 
   <ItemGroup>
     <Content Remove="appsettings %28コピー%29.json" />
-    <Content Remove="appsettings.json" />
+    <Content Remove="wwwroot\0bc9fa36.jpg" />
+    <Content Remove="wwwroot\1526800811417.jpg" />
+    <Content Remove="wwwroot\1527410870429.jpg" />
+    <Content Remove="wwwroot\20160101_1659.jpg" />
+    <Content Remove="wwwroot\2018-07-31_2347560_clean.jpg" />
+    <Content Remove="wwwroot\2018-08-03_0338060_clean.jpg" />
+    <Content Remove="wwwroot\25782.jpg" />
+    <Content Remove="wwwroot\4531.jpg" />
+    <Content Remove="wwwroot\7043.jpg" />
+    <Content Remove="wwwroot\favicon.ico" />
+    <Content Remove="wwwroot\isikitakaikeimushoku.PNG" />
     <Content Remove="wwwroot\js\Progresses.js" />
+    <Content Remove="wwwroot\pos.png" />
+    <Content Remove="wwwroot\S__67665927.jpg" />
+    <Content Remove="wwwroot\S__67665930.jpg" />
+    <Content Remove="wwwroot\S__68263954.jpg" />
+    <Content Remove="wwwroot\S__68313092.jpg" />
+    <Content Remove="wwwroot\S__68313094.jpg" />
+    <Content Remove="wwwroot\ダウンロード.jpg" />
+    <Content Remove="wwwroot\環境構築.PNG" />
   </ItemGroup>
 
   <ItemGroup>

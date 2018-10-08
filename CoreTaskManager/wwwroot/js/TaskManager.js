@@ -23,6 +23,7 @@ class OperateTaskForm {
                 if (this.transmitTaskData() === "success") {
                     this.destroyFirstForms();
                     this.destroyAddedForms();
+                    $('.modal-backdrop').remove(); 
                     $('#registerNew').modal('hide');
                     $('#modalButton').hide();
                 }
@@ -147,7 +148,9 @@ class ProgressTable {
         });
         $('#approvalRequestButton').on('click', e => {
             this.registerProgress(this.cellId);
-        })
+            $('.modal-backdrop').remove();
+            $('#approvalRequest').modal('hide');
+        });
     }
 
     registerProgress(cell) {
@@ -174,7 +177,6 @@ class ProgressTable {
                 }
                 this.changeCellDisplay(cell, JSON.parse(response).dateTime);
                 console.log("success");
-                $('#approvalRequest').modal('hide');
             },
             failure: response => {
                 alert("通信に失敗しました");
