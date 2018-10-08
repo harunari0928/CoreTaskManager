@@ -1,18 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using CoreTaskManager.Model;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using CoreTaskManager.Model;
-using CoreTaskManager.Models;
-using Microsoft.AspNetCore.Authorization;
-using System.IO;
 using Newtonsoft.Json;
-using Microsoft.AspNetCore.Http;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace CoreTaskManager.Pages.TaskManager
 {
@@ -20,15 +19,13 @@ namespace CoreTaskManager.Pages.TaskManager
     public class IndexModel : PageModel
     {
         private readonly CoreTaskManager.Models.CoreTaskManagerContext _context;
-        private const string SessionCurrentPage = "CurrentPage";
         private const string SessionCurrentProgress = "CurrentProgress";
         private const string SessionNumberOfTasks = "NumberOfTasks";
-        private int _pageSize { get; set; }
+        private const int _pageSize = 5;
 
         public IndexModel(CoreTaskManager.Models.CoreTaskManagerContext context)
         {
             _context = context;
-            _pageSize = 5;
         }
 
         [BindProperty]
@@ -42,19 +39,21 @@ namespace CoreTaskManager.Pages.TaskManager
         public Progress ThisProgress { get; set; }
         public IList<AchievedTask> AchivedInThisProgress { get; set; }
 
-        public async Task<IActionResult> OnGetAsync(string progressIdString, string currentPageString)
+        public async Task<IActionResult> OnGetAsync(string progressIdString)
         {
+            if (!HttpContext.Session.IsAvailable)
+            {
+                await HttpContext.Session.LoadAsync();
+            }
             if (String.IsNullOrEmpty(progressIdString))
             {
-                return Redirect("./Progresses");
+                return Redirect("../Progresses");
             }
             int progressId = int.Parse(progressIdString);
-            int currentPage = int.Parse(currentPageString ?? "1");
-            HttpContext.Session.SetInt32(SessionCurrentPage, currentPage);
             HttpContext.Session.SetInt32(SessionCurrentProgress, progressId);
-
+            
             var thisProgress = from p in _context.Progresses
-                                select p;
+                               select p;
             thisProgress = thisProgress.Where(p => p.Id == progressId);
             if (thisProgress.Count() == 0)
             {
@@ -63,7 +62,6 @@ namespace CoreTaskManager.Pages.TaskManager
             var participants = from p in _context.Participants
                                select p;
             participants = participants.Where(p => p.ProgressId == progressId);
-            participants = participants.Take(_pageSize).Skip((currentPage - 1) * _pageSize);
 
             var tasks = from t in _context.Tasks
                         select t;
@@ -72,7 +70,6 @@ namespace CoreTaskManager.Pages.TaskManager
             var achievedtasks = from a in _context.AchievedTasks
                                 select a;
             achievedtasks = achievedtasks.Where(a => a.ProgressId == progressId);
-
 
             Participants = await participants.ToListAsync();
             ThisTasks = await tasks.ToListAsync();
@@ -83,14 +80,19 @@ namespace CoreTaskManager.Pages.TaskManager
         }
         public ActionResult OnPostSetTasks()
         {
+            if (!HttpContext.Session.IsAvailable)
+            {
+                HttpContext.Session.LoadAsync();
+            }
             try
             {
-                int? _progressId = HttpContext.Session.GetInt32(SessionCurrentProgress);
-                int? _numberOfTasks = HttpContext.Session.GetInt32(SessionNumberOfTasks);
-                if (_progressId == null || _numberOfTasks == null)
+                int? progressId = HttpContext.Session.GetInt32(SessionCurrentProgress);
+                int? numberOfTasks = HttpContext.Session.GetInt32(SessionNumberOfTasks);
+                if (progressId == null || numberOfTasks == null)
                 {
                     return new JsonResult("serverError");
                 }
+                
                 var Tasks = new List<TaskModel>();
                 {
                     var stream = new MemoryStream();
@@ -106,7 +108,7 @@ namespace CoreTaskManager.Pages.TaskManager
                             {
                                 var receiveString = receiveData[$"task{i.ToString()}"];
                                 // すでにタスクが登録されていた場合は登録できない
-                                if (_numberOfTasks > 0)
+                                if (numberOfTasks > 0)
                                 {
                                     return new JsonResult("wrongString");
                                 }
@@ -117,11 +119,11 @@ namespace CoreTaskManager.Pages.TaskManager
 
                                 Tasks.Add(new TaskModel
                                 {
-                                    ProgressId = (int)_progressId,
+                                    ProgressId = (int)progressId,
                                     TaskName = receiveString
                                 });
                             }
-                            ThisProgress = _context.Progresses.FirstOrDefault(p => p.Id == _progressId);
+                            ThisProgress = _context.Progresses.FirstOrDefault(p => p.Id == progressId);
                             ThisProgress.NumberOfItems = receiveData.Count;
                         }
                     }
@@ -129,6 +131,7 @@ namespace CoreTaskManager.Pages.TaskManager
 
                 Tasks.ForEach(task => _context.Tasks.Add(task));
                 _context.SaveChanges();
+                Redirect($"TaskManager/Index?progressIdString={progressId}");
                 return new JsonResult("success");
             }
             catch
@@ -137,7 +140,7 @@ namespace CoreTaskManager.Pages.TaskManager
             }
 
         }
-        public ActionResult OnPostUpdateProgress()
+        public JsonResult OnPostUpdateProgress()
         {
             try
             {
@@ -199,7 +202,8 @@ namespace CoreTaskManager.Pages.TaskManager
                     TaskId = clickedTaskId,
                     UserName = clickedParticipantName,
                     AchievedDateTime = DateTime.Now,
-                    IsAuthorized = false
+                    IsAuthorized = false,
+                    Description = aSingleWord
                 };
 
                 var thisProgress = _context.Progresses.Where(p => p.Id == progressId).First();
@@ -215,6 +219,7 @@ namespace CoreTaskManager.Pages.TaskManager
                 {
                     { "dateTime", DateTime.Now.ToString() }
                 };
+                Redirect($"TaskManager/Index?progressIdString={progressId}");
                 return new JsonResult(JsonConvert.SerializeObject(result));
             }
             catch
@@ -222,52 +227,53 @@ namespace CoreTaskManager.Pages.TaskManager
                 return new JsonResult("serverError");
             }
         }
+
+
         public async Task<IActionResult> OnPostSetPariticipant()
         {
-            var _progressId = HttpContext.Session.GetInt32(SessionCurrentProgress);
-            var _currentPage = HttpContext.Session.GetInt32(SessionCurrentPage);
-            if (_progressId == null)
+            if (!HttpContext.Session.IsAvailable)
             {
-                return Redirect("./Progresses");
+                await HttpContext.Session.LoadAsync();
             }
+            var progressId = HttpContext.Session.GetInt32(SessionCurrentProgress);
             var participantInThisProgress = _context.Participants.Where(p => p.UserName == User.Identity.Name)
-                .Where(p => p.ProgressId == _progressId);
+                .Where(p => p.ProgressId == progressId);
             if (participantInThisProgress.Count() != 0)
             {
-                return Redirect("./Progresses");
+                return Redirect($"TaskManager/Index?progressIdString={progressId}");
             }
             _context.Participants.Add(new Participant
             {
-                ProgressId = (int)_progressId,
+                ProgressId = (int)progressId,
                 UserName = User.Identity.Name,
                 CurrentProgress = 0
             });
 
             await _context.SaveChangesAsync();
-            return Redirect($"TaskManager/Index?progressIdString={_progressId}&currentPageString={_currentPage.ToString()}");
+            return Redirect($"TaskManager/Index?progressIdString={progressId}");
         }
         public async Task<IActionResult> OnPostDeleteParticipant()
         {
-            var progressId = HttpContext.Session.GetInt32(SessionCurrentProgress);
-            var currentPage = HttpContext.Session.GetInt32(SessionCurrentPage);
-            if (progressId == null)
+            if (!HttpContext.Session.IsAvailable)
+            {
+                await HttpContext.Session.LoadAsync();
+            }
+            if (HttpContext.Session.GetInt32(SessionCurrentProgress) == null)
             {
                 return Redirect("../Progresses");
             }
+            var progressId = HttpContext.Session.GetInt32(SessionCurrentProgress);
             var thisParticipant = _context.Participants.Where(p => p.ProgressId == progressId)
-                .Where(p => p.UserName == User.Identity.Name).FirstOrDefaultAsync();
-            if (thisParticipant.Result == null)
+                .Where(p => p.UserName == User.Identity.Name).First();
+            if (thisParticipant == null)
             {
-                return Redirect($"TaskManager/Index?progressIdString={progressId.ToString()}&currentPageString={currentPage.ToString()}");
+                return Redirect($"TaskManager/Index?progressIdString={progressId.ToString()}");
             }
-            int id = thisParticipant.Result.Id;
-            ThisParticipant = await _context.Participants.FindAsync(id);
-            if (ThisParticipant != null)
-            {
-                _context.Participants.Remove(ThisParticipant);
-                await _context.SaveChangesAsync();
-            }
-            return Redirect($"TaskManager/Index?progressIdString={progressId.ToString()}&currentPageString={currentPage.ToString()}");
+
+            _context.Participants.Remove(thisParticipant);
+            await _context.SaveChangesAsync();
+
+            return Redirect($"TaskManager/Index?progressIdString={progressId.ToString()}");
         }
         private Participant AcquireClickedParticipant(DbSet<Participant> displayedParticipants, int progressId, ColumAlphaBet alphabet)
         {
