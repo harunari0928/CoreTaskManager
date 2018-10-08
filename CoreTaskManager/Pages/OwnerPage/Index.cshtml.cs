@@ -9,9 +9,11 @@ using CoreTaskManager.Model;
 using CoreTaskManager.Models;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
+using Microsoft.AspNetCore.Authorization;
 
 namespace CoreTaskManager.Pages.OwnerPage
 {
+    [Authorize]
     public class IndexModel : PageModel
     {
         private readonly CoreTaskManager.Models.CoreTaskManagerContext _context;
@@ -66,7 +68,7 @@ namespace CoreTaskManager.Pages.OwnerPage
                         ProgressName = _context.Progresses.Where(p => p.Id == achievedTask.ProgressId).First().Title,
                         TaskName = _context.Tasks.Where(t => t.Id == achievedTask.TaskId).First().TaskName,
                         AchievedDateTime = achievedTask.AchievedDateTime,
-                        Description = achievedTask.Description ?? ""
+                        Description = achievedTask.Description ?? "（なし）"
                     });
                 }
                 return new JsonResult(JsonConvert.SerializeObject(unappliedTasks));
