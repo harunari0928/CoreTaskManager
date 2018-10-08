@@ -15,6 +15,18 @@
         <div class="col-md-2">
             <br />
             @*まだタスクが登録されていないときのみタスク設定できる*@
+            @if (Model.ThisProgress.UserName == User.Identity.Name)
+            {
+                <a class="btn btn-warning" href="../OwnerPage?progressIdString=@Model.ThisProgress.Id.ToString()">
+                    管理画面
+                </a>
+            }
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2">
+            <br />
+            @*まだタスクが登録されていないときのみタスク設定できる*@
             @if (Model.ThisProgress.NumberOfItems == 0 && Model.ThisProgress.UserName == User.Identity.Name)
             {
                 <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#registerNew" id="modalButton">
