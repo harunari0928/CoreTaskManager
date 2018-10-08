@@ -137,19 +137,24 @@ class OperateTaskForm {
 
 class ProgressTable {
     constructor() {
-        this.achievedDateTime;
+        this.cellId;
         $('tbody>tr').on('click', e => {
-            console.log(e.target.id);
+            this.cellId = e.target.id;
             // タスク名のセルが押されたときは何もしない
             if (e.target.id === "taskName") {
                 return;
             }
-            this.registerProgress(e.target.id);
         });
+        $('#approvalRequestButton').on('click', e => {
+            this.registerProgress(this.cellId);
+        })
     }
 
     registerProgress(cell) {
-        let sendData = { cellId: cell };
+        let sendData = {
+            cellId: cell,
+            aSingleWord: $('#aSingleWord').val()
+        };
         $.ajax({
             type: "POST",
             data: JSON.stringify(sendData),
@@ -169,6 +174,7 @@ class ProgressTable {
                 }
                 this.changeCellDisplay(cell, JSON.parse(response).dateTime);
                 console.log("success");
+                $('#approvalRequest').modal('hide');
             },
             failure: response => {
                 alert("通信に失敗しました");
@@ -177,7 +183,7 @@ class ProgressTable {
     }
     changeCellDisplay(cell, achivedDateTime) {
         $('#' + cell).css('background-color', 'yellow');
-        $('#' + cell).text('【未認証】' + achivedDateTime);
+        $('#' + cell).text('【未認証】\n' + achivedDateTime);
     }
 }
 

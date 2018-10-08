@@ -53,10 +53,10 @@ namespace CoreTaskManager.Pages.TaskManager
             HttpContext.Session.SetInt32(SessionCurrentPage, currentPage);
             HttpContext.Session.SetInt32(SessionCurrentProgress, progressId);
 
-            var _thisProgress = from p in _context.Progresses
+            var thisProgress = from p in _context.Progresses
                                 select p;
-            _thisProgress = _thisProgress.Where(p => p.Id == progressId);
-            if (_thisProgress.Count() == 0)
+            thisProgress = thisProgress.Where(p => p.Id == progressId);
+            if (thisProgress.Count() == 0)
             {
                 return Redirect("./Progresses");
             }
@@ -76,7 +76,7 @@ namespace CoreTaskManager.Pages.TaskManager
 
             Participants = await participants.ToListAsync();
             ThisTasks = await tasks.ToListAsync();
-            ThisProgress = await _thisProgress.FirstAsync();
+            ThisProgress = await thisProgress.FirstAsync();
             AchivedInThisProgress = await achievedtasks.ToListAsync();
             HttpContext.Session.SetInt32(SessionNumberOfTasks, ThisProgress.NumberOfItems);
             return Page();
@@ -143,11 +143,14 @@ namespace CoreTaskManager.Pages.TaskManager
             {
                 int? progressId = HttpContext.Session.GetInt32(SessionCurrentProgress);
                 int? numberOfTasks = HttpContext.Session.GetInt32(SessionNumberOfTasks);
+
                 if (progressId == null || numberOfTasks == null)
                 {
                     return new JsonResult("serverError");
                 }
-                string cellId = "";
+
+                var aSingleWord = "";
+                var cellId = "";
                 {
                     var stream = new MemoryStream();
                     Request.Body.CopyTo(stream);
@@ -161,8 +164,10 @@ namespace CoreTaskManager.Pages.TaskManager
                         }
                         var receiveData = JsonConvert.DeserializeObject<Dictionary<string, string>>(requestBody);
                         cellId = receiveData["cellId"];
+                        aSingleWord = receiveData["aSingleWord"];
                     }
                 }
+
                 var columAlphabet = (ColumAlphaBet)Enum.Parse(typeof(ColumAlphaBet), cellId[0].ToString());
                 int rowNumber = int.Parse(cellId.Substring(1, cellId.Length - 1));
                 var clickedTask = AcquireClickedTask(_context.Tasks, (int)progressId, rowNumber);
@@ -200,7 +205,7 @@ namespace CoreTaskManager.Pages.TaskManager
                 var thisProgress = _context.Progresses.Where(p => p.Id == progressId).First();
                 if (!String.IsNullOrEmpty(thisProgress.SlackAppUrl))
                 {
-                    NortificationToOutside(thisProgress, clickedTask, achievdTask);
+                    NortificationToOutside(thisProgress, clickedTask, achievdTask, aSingleWord);
                 }
 
                 _context.AchievedTasks.Add(achievdTask);
@@ -223,13 +228,13 @@ namespace CoreTaskManager.Pages.TaskManager
             var _currentPage = HttpContext.Session.GetInt32(SessionCurrentPage);
             if (_progressId == null)
             {
-                return RedirectToPage("../Progresses");
+                return Redirect("./Progresses");
             }
             var participantInThisProgress = _context.Participants.Where(p => p.UserName == User.Identity.Name)
                 .Where(p => p.ProgressId == _progressId);
             if (participantInThisProgress.Count() != 0)
             {
-                return RedirectToPage("../Progresses");
+                return Redirect("./Progresses");
             }
             _context.Participants.Add(new Participant
             {
@@ -243,27 +248,26 @@ namespace CoreTaskManager.Pages.TaskManager
         }
         public async Task<IActionResult> OnPostDeleteParticipant()
         {
-            var _progressId = HttpContext.Session.GetInt32(SessionCurrentProgress);
-            var _currentPage = HttpContext.Session.GetInt32(SessionCurrentPage);
-            if (_progressId == null)
+            var progressId = HttpContext.Session.GetInt32(SessionCurrentProgress);
+            var currentPage = HttpContext.Session.GetInt32(SessionCurrentPage);
+            if (progressId == null)
             {
-                return RedirectToPage("../Progresses");
+                return Redirect("../Progresses");
             }
-            var _thisParticipant = _context.Participants.Where(p => p.ProgressId == _progressId)
+            var thisParticipant = _context.Participants.Where(p => p.ProgressId == progressId)
                 .Where(p => p.UserName == User.Identity.Name).FirstOrDefaultAsync();
-            if (_thisParticipant.Result == null)
+            if (thisParticipant.Result == null)
             {
-                return Redirect($"TaskManager/Index?progressIdString={_progressId.ToString()}&currentPageString={_currentPage.ToString()}");
+                return Redirect($"TaskManager/Index?progressIdString={progressId.ToString()}&currentPageString={currentPage.ToString()}");
             }
-            int id = _thisParticipant.Result.Id;
+            int id = thisParticipant.Result.Id;
             ThisParticipant = await _context.Participants.FindAsync(id);
             if (ThisParticipant != null)
             {
                 _context.Participants.Remove(ThisParticipant);
                 await _context.SaveChangesAsync();
             }
-
-            return Redirect($"TaskManager/Index?progressIdString={_progressId.ToString()}&currentPageString={_currentPage.ToString()}");
+            return Redirect($"TaskManager/Index?progressIdString={progressId.ToString()}&currentPageString={currentPage.ToString()}");
         }
         private Participant AcquireClickedParticipant(DbSet<Participant> displayedParticipants, int progressId, ColumAlphaBet alphabet)
         {
@@ -276,7 +280,7 @@ namespace CoreTaskManager.Pages.TaskManager
                 .Skip(rowNumber - 1).First();
             return selectedTask;
         }
-        private void NortificationToOutside(Progress progress, TaskModel thisTask, AchievedTask achievedTask)
+        private void NortificationToOutside(Progress progress, TaskModel thisTask, AchievedTask achievedTask, string aSingleWord)
         {
             var wc = new WebClient();
             // TODO 承認作業用url
@@ -289,6 +293,12 @@ namespace CoreTaskManager.Pages.TaskManager
             sendStatement.AppendLine("<タスク名>");
             sendStatement.AppendLine("■" + progress.Title);
             sendStatement.AppendLine("  -" + thisTask.TaskName);
+            if (!String.IsNullOrEmpty(aSingleWord))
+            {
+                sendStatement.AppendLine("");
+                sendStatement.AppendLine("<一言>");
+                sendStatement.AppendLine(aSingleWord);
+            }
             var sendData = JsonConvert.SerializeObject(new
             {
                 text = sendStatement.ToString(),

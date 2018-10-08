@@ -23,7 +23,7 @@
         </div>
     </div>
     <br />
-    @*進捗更新機能*@
+    @*入退出*@
     <div class="row">
         <div class="col-md-2">
             <form method="post">
@@ -89,37 +89,46 @@
                         }
                         @foreach (var task in Model.ThisTasks)
                         {
-                            <tr>
-                                <td id="taskName" style="background-color:#3f3f3f;color:white">
-                                    @rowNumber.ToString().
-                                    @Html.DisplayFor(modelItem => task.TaskName)
-                                </td>
-                                @foreach (var item in Model.Participants)
-                                {
-                                    var achived = Model.AchivedInThisProgress.ToList();
-                                    achived = achived.Where(a => a.TaskId == task.Id)
-                                            .Where(a => a.UserName == item.UserName).ToList();
-                                    string cellId = columAlphaBet[columNumber] + rowNumber.ToString();
+                        <tr>
+                            <td id="taskName" style="background-color:#3f3f3f;color:white">
+                                @rowNumber.ToString().
+                                @Html.DisplayFor(modelItem => task.TaskName)
+                            </td>
+                            @foreach (var item in Model.Participants)
+                            {
+                                var achived = Model.AchivedInThisProgress.ToList();
+                                achived = achived.Where(a => a.TaskId == task.Id)
+                                        .Where(a => a.UserName == item.UserName).ToList();
+                                string cellId = columAlphaBet[columNumber] + rowNumber.ToString();
 
-                                    if (achived.Count == 0)
+                                if (achived.Count == 0)
+                                {
+                                    //ログインしているユーザ自身のセルとそれ以外を分ける
+                                    int currentProgress = item.CurrentProgress;
+                                    if (item.UserName == User.Identity.Name && currentProgress + 1 == rowNumber)
                                     {
-                                        <td id="@cellId" style="background-color:darkgray"></td>
-                                    }
-                                    else if (achived.First().IsAuthorized)
-                                    {
-                                        <td id="@cellId" style="background-color:greenyellow">
-                                            @achived.First().AchievedDateTime.ToString()
-                                        </td>
+                                        <td id="@cellId" style="background-color:darkgray" data-toggle="modal" data-target="#approvalRequest"></td>
                                     }
                                     else
                                     {
-                                        <td id="@cellId" style="background-color:yellow">
-                                            【未認証】<br />@achived.First().AchievedDateTime.ToString()
-                                        </td>
+                                        <td id="@cellId" style="background-color:darkgray"></td>
                                     }
-                                    columNumber++;
                                 }
-                            </tr>
+                                else if (achived.First().IsAuthorized)
+                                {
+                                    <td id="@cellId" style="background-color:greenyellow">
+                                        @achived.First().AchievedDateTime.ToString()
+                                    </td>
+                                }
+                                else
+                                {
+                                    <td id="@cellId" style="background-color:yellow">
+                                        【未認証】<br />@achived.First().AchievedDateTime.ToString()
+                                    </td>
+                                }
+                                columNumber++;
+                            }
+                        </tr>
                             rowNumber++;
                             columNumber = 1;
                         }
@@ -132,7 +141,8 @@
         </div>
     </div>
 </div>
-@*タスク登録*@
+
+@*タスク登録モーダル*@
 <div class="modal fade" id="registerNew" tabindex="-1" role="dialog" aria-labelledby="#registerNewTitle" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -160,6 +170,28 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" id="modalClose" data-dismiss="modal">閉じる</button>
                 <button type="button" class="btn btn-primary" id="transmitTaskData">変更を保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+@*進捗更新確認モーダル*@
+<div class="modal fade" id="approvalRequest" tabindex="-1" role="dialog" aria-labelledby="#approvalRequestTitle" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="approvalRequestTitle">確認</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="閉じる">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <label>一言（あれば）</label>
+                <br />
+                <textarea rows="5" cols="20" class="form-control" id="aSingleWord"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-danger" id="approvalRequestButton" >承認依頼</button>
+                <button class="btn btn-secondary" data-dismiss="modal">キャンセル</button>
             </div>
         </div>
     </div>
