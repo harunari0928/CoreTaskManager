@@ -13,5 +13,6 @@ namespace CoreTaskManager.Model
         public string UserName { get; set; }
         public DateTime AchievedDateTime { get; set; }
         public bool IsAuthorized { get; set; }
+        public string Description { get; set; }
     }
 }
