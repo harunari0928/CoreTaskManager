@@ -49,7 +49,7 @@ namespace CoreTaskManager.Pages.Progresses
             HttpContext.Session.SetString(SessionSearchString, searchString ?? "");
 
             var progresses = FilterProgresses(progressGenre, searchString, currentPageString);
-            Progresses = await progresses.ToListAsync();
+            Progresses = await progresses.OrderByDescending(p => p.RegisteredDateTime).ToListAsync();
             Genres = new SelectList(await GenerateGenreList().ToListAsync());
 
         }
@@ -125,7 +125,7 @@ namespace CoreTaskManager.Pages.Progresses
             await OnGetAsync(progresssGenre, searchString, currentPage.ToString());
         }
 
-        private IQueryable<Progress> FilterProgresses(string progressGenre, string searchString, string currentPageString)
+        IQueryable<Progress> FilterProgresses(string progressGenre, string searchString, string currentPageString)
         {
             int currentPage = 1;
             ViewData["CurrentPage"] = "1";
@@ -152,14 +152,14 @@ namespace CoreTaskManager.Pages.Progresses
             HttpContext.Session.SetInt32(SessionLastPage, lastPage);
             return progresses = Paging(progresses, currentPage, _pageSize);
         }
-        private IQueryable<string> GenerateGenreList()
+        IQueryable<string> GenerateGenreList()
         {
             var genreQuery = from m in _context.Progresses
                              orderby m.Genre
                              select m.Genre;
             return genreQuery.Distinct();
         }
-        private IQueryable<Progress> Paging(IQueryable<Progress> progresses, int currentPage, int pageSize)
+        IQueryable<Progress> Paging(IQueryable<Progress> progresses, int currentPage, int pageSize)
         {
             // もし変数currenPageが不正な値であればページは１とする
             if (currentPage < 1)
