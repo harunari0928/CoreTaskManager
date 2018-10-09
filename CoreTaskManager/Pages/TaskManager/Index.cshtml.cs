@@ -166,7 +166,6 @@ namespace CoreTaskManager.Pages.TaskManager
             }
         }
 
-
         public async Task<IActionResult> OnPostSetPariticipant()
         {
             if (!HttpContext.Session.IsAvailable)
@@ -207,7 +206,8 @@ namespace CoreTaskManager.Pages.TaskManager
             {
                 return Redirect($"TaskManager/Index?progressIdString={progressId.ToString()}");
             }
-
+            var achievedTasks = _context.AchievedTasks.Where(a => a.ProgressId == progressId).Where(a => a.UserName == thisParticipant.UserName).ToList();
+            achievedTasks.ForEach(a => _context.AchievedTasks.Remove(a));
             _context.Participants.Remove(thisParticipant);
             await _context.SaveChangesAsync();
 

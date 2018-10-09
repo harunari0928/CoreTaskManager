@@ -90,10 +90,12 @@
                                         // 未達成タスクセル
                                         if (item.UserName == User.Identity.Name && currentProgress + 1 == rowNumber)
                                         {
+                                            // ひとつ前が完了している申請できるタスクセル
                                             <td id="@cellId" style="background-color:darkgray" data-toggle="modal" data-target="#approvalRequest"></td>
                                         }
                                         else
                                         {
+                                            // ひとつ前が完了しておらず、申請できないタスクセル
                                             <td id="@cellId" style="background-color:darkgray"></td>
                                         }
                                     }

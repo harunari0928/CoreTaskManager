@@ -49,7 +49,7 @@ namespace CoreTaskManager.Pages.Progresses
             HttpContext.Session.SetString(SessionSearchString, searchString ?? "");
 
             var progresses = FilterProgresses(progressGenre, searchString, currentPageString);
-            Progresses = await progresses.OrderByDescending(p => p.RegisteredDateTime).ToListAsync();
+            Progresses = await progresses.ToListAsync();
             Genres = new SelectList(await GenerateGenreList().ToListAsync());
 
         }
@@ -137,7 +137,7 @@ namespace CoreTaskManager.Pages.Progresses
 
             var progresses = from p in _context.Progresses
                              select p;
-
+            progresses = progresses.OrderByDescending(p => p.RegisteredDateTime);
             if (!String.IsNullOrEmpty(searchString))
             {
                 progresses = progresses.Where(p => p.Title.Contains(searchString));
