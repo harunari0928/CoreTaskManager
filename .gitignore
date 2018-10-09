@@ -268,3 +268,4 @@ __pycache__/
 # setting
 /CoreTaskManager/appsettings.json
 /CoreTaskManager/Azure/MyDb
+*.gif
