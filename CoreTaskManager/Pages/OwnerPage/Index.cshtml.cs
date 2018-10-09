@@ -47,6 +47,7 @@ namespace CoreTaskManager.Pages.OwnerPage
                 return Redirect("../Progresses");
             }
             HttpContext.Session.SetInt32(SessionCurrentProgress, currentProgress);
+            HttpContext.Session.SetInt32(SessionNumberOfTasks, thisProgress.First().NumberOfItems);
             AchievedTasks = await _context.AchievedTasks.ToListAsync();
             ThisProgress = await thisProgress.FirstAsync();
             return Page();

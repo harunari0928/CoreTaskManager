@@ -78,68 +78,6 @@ namespace CoreTaskManager.Pages.TaskManager
             HttpContext.Session.SetInt32(SessionNumberOfTasks, ThisProgress.NumberOfItems);
             return Page();
         }
-        public ActionResult OnPostSetTasks()
-        {
-            if (!HttpContext.Session.IsAvailable)
-            {
-                HttpContext.Session.LoadAsync();
-            }
-            try
-            {
-                int? progressId = HttpContext.Session.GetInt32(SessionCurrentProgress);
-                int? numberOfTasks = HttpContext.Session.GetInt32(SessionNumberOfTasks);
-                if (progressId == null || numberOfTasks == null)
-                {
-                    return new JsonResult("serverError");
-                }
-                
-                var Tasks = new List<TaskModel>();
-                {
-                    var stream = new MemoryStream();
-                    Request.Body.CopyTo(stream);
-                    stream.Position = 0;
-                    using (var reader = new StreamReader(stream))
-                    {
-                        string requestBody = reader.ReadToEnd();
-                        if (requestBody.Length > 0)
-                        {
-                            var receiveData = JsonConvert.DeserializeObject<Dictionary<string, string>>(requestBody);
-                            for (int i = 1; i <= receiveData.Count; i++)
-                            {
-                                var receiveString = receiveData[$"task{i.ToString()}"];
-                                // すでにタスクが登録されていた場合は登録できない
-                                if (numberOfTasks > 0)
-                                {
-                                    return new JsonResult("wrongString");
-                                }
-                                if (receiveString.Length > 15 || receiveString.Length == 0)
-                                {
-                                    return new JsonResult("wrongString");
-                                }
-
-                                Tasks.Add(new TaskModel
-                                {
-                                    ProgressId = (int)progressId,
-                                    TaskName = receiveString
-                                });
-                            }
-                            ThisProgress = _context.Progresses.FirstOrDefault(p => p.Id == progressId);
-                            ThisProgress.NumberOfItems = receiveData.Count;
-                        }
-                    }
-                }
-
-                Tasks.ForEach(task => _context.Tasks.Add(task));
-                _context.SaveChanges();
-                Redirect($"TaskManager/Index?progressIdString={progressId}");
-                return new JsonResult("success");
-            }
-            catch
-            {
-                return new JsonResult("serverError");
-            }
-
-        }
         public JsonResult OnPostUpdateProgress()
         {
             try
