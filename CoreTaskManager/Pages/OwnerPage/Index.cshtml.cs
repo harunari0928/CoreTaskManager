@@ -26,7 +26,7 @@ namespace CoreTaskManager.Pages.OwnerPage
             _context = context;
         }
 
-        public IList<AchievedTask> AchievedTasks { get;set; }
+        public IList<AchievedTask> AchievedTasks { get; set; }
         public Progress ThisProgress { get; set; }
 
         public async Task<IActionResult> OnGetAsync(string progressIdString)
@@ -62,7 +62,7 @@ namespace CoreTaskManager.Pages.OwnerPage
             }
             try
             {
-                AchievedTasks = _context.AchievedTasks.Where(a => a.ProgressId == currentProgress).ToList();
+                AchievedTasks = _context.AchievedTasks.Where(a => a.ProgressId == currentProgress).Where(a => a.IsAuthorized == false).ToList();
                 var unappliedTasks = new List<UnappliedTaskTableModel>();
                 foreach (var achievedTask in AchievedTasks)
                 {
@@ -144,6 +144,67 @@ namespace CoreTaskManager.Pages.OwnerPage
                 return new JsonResult("serverError");
             }
 
+        }
+        public ActionResult OnPostApproval()
+        {
+            int? currentProgress = HttpContext.Session.GetInt32(SessionCurrentProgress);
+            if (currentProgress == null)
+            {
+                Redirect("../Progresses");
+                return new JsonResult("serverError");
+            }
+            try
+            {
+                int achievedTaskId = -1;
+                string requestUser = "";
+                {
+                    var stream = new MemoryStream();
+                    Request.Body.CopyTo(stream);
+                    stream.Position = 0;
+                    using (var reader = new StreamReader(stream))
+                    {
+                        string requestBody = reader.ReadToEnd();
+                        if (requestBody.Length > 0)
+                        {
+                            var receiveData = JsonConvert.DeserializeObject<Dictionary<string, string>>(requestBody);
+                            for (int i = 1; i <= receiveData.Count; i++)
+                            {
+                                achievedTaskId = int.Parse(receiveData["achievedTaskId"]);
+                                requestUser = receiveData["requestUser"];
+                            }
+                        }
+                    }
+                }
+                if (achievedTaskId == -1 || requestUser == "")
+                {
+                    return new JsonResult("serverError");
+                }
+                var achivedTasksQuery = _context.AchievedTasks.Where(a => a.ProgressId == currentProgress).Where(a => a.IsAuthorized == false);
+                achivedTasksQuery.FirstOrDefault(a => a.Id == achievedTaskId).IsAuthorized = true;
+                var participantsQuery = _context.Participants.Where(p => p.ProgressId == currentProgress).FirstOrDefault(p => p.UserName == requestUser);
+                participantsQuery.CurrentProgress++;
+                _context.SaveChanges();
+
+                var unappliedTasks = new List<UnappliedTaskTableModel>();
+                AchievedTasks = achivedTasksQuery.ToList();
+                foreach (var achievedTask in AchievedTasks)
+                {
+                    unappliedTasks.Add(new UnappliedTaskTableModel
+                    {
+                        AchievedTaskId = achievedTask.Id,
+                        UserName = achievedTask.UserName,
+                        ProgressName = _context.Progresses.Where(p => p.Id == achievedTask.ProgressId).First().Title,
+                        TaskName = _context.Tasks.Where(t => t.Id == achievedTask.TaskId).First().TaskName,
+                        AchievedDateTime = achievedTask.AchievedDateTime,
+                        Description = achievedTask.Description ?? "（なし）"
+                    });
+                }
+                return new JsonResult(JsonConvert.SerializeObject(unappliedTasks));
+            }
+            catch
+            {
+                return new JsonResult("serverError");
+            }
         }
     }
 }

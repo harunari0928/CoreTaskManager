@@ -5,15 +5,22 @@
 
 class UnappliedTasksTable {
     constructor() {
-        this.requestTableObject();
-        $('h3').on('click', e => {
-            console.log(e);
-            $('#aSingleWord').text = $('#words' + e.target.id).val();
+        this.unauthenticatedTaskId;
+        this.requestingUser;
+
+        this.requestTable();
+        $('#unappliedTaskTable').on('click', 'table>tbody', e => {
+            this.unauthenticatedTaskId = e.target.parentNode.id;
+            this.requestingUser = e.target.parentNode.firstChild.firstChild.data;
+            $('#aSingleWord').text($('#words' + this.unauthenticatedTaskId).val());
             $('#approval').modal('show');
+        });
+        $('#approvalRequestButton').on('click', e => {
+            this.approval(this.unauthenticatedTaskId, this.requestingUser);
         });
     }
 
-    requestTableObject() {
+    requestTable() {
         $.ajax({
             type: "POST",
             url: "/OwnerPage?handler=SendUnappliedTable",
@@ -24,7 +31,6 @@ class UnappliedTasksTable {
             contentType: "application/json; charset=utf-8",
             dataType: "json",
             success: response => {
-                console.log("aaa");
                 if (response === "serverError") {
                     return alert("サーバでエラーが発生しました");
                 }
@@ -40,7 +46,6 @@ class UnappliedTasksTable {
         });
     }
     createTable(tasksObject) {
-        
         let tag;
         tag = "" +
             "<table id='table' class='table table-hover table-striped table-responsive'>" +
@@ -71,8 +76,38 @@ class UnappliedTasksTable {
         let resultTag = document.getElementById("unappliedTaskTable");
         resultTag.innerHTML = tag;
     }
+    approval(id, user) {
+        let sendData = {
+            achievedTaskId: id,
+            requestUser: user
+        };
+        $.ajax({
+            type: "POST",
+            data: JSON.stringify(sendData),
+            url: "/OwnerPage?handler=Approval",
+            beforeSend: xhr => {
+                xhr.setRequestHeader("XSRF-TOKEN",
+                    $('input:hidden[name="__RequestVerificationToken"]').val());
+            },
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: response => {
+                if (response === "serverError") {
+                    return alert("サーバでエラーが発生しました");
+                }
+                if (response === "failed") {
+                    return;
+                }
+                this.createTable(JSON.parse(response));
+                console.log("success");
+                $('#approval').modal('hide');
+            },
+            failure: response => {
+                alert("通信に失敗しました");
+            }
+        });
+    }
 }
-
 class OperateTaskForm {
     constructor() {
         // 初めはフォーム一つだけ
@@ -176,7 +211,7 @@ class OperateTaskForm {
         $.ajax({
             type: "POST",
             data: JSON.stringify(tasks),
-            url: "/TaskManager?handler=SetTasks",
+            url: "/OwnerPage?handler=SetTasks",
             beforeSend: xhr => {
                 xhr.setRequestHeader("XSRF-TOKEN",
                     $('input:hidden[name="__RequestVerificationToken"]').val());

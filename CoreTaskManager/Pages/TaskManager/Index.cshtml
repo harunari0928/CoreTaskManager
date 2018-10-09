@@ -87,6 +87,7 @@
                                     {
                                         //ログインしているユーザ自身のセルとそれ以外を分ける
                                         int currentProgress = item.CurrentProgress;
+                                        // 未達成タスクセル
                                         if (item.UserName == User.Identity.Name && currentProgress + 1 == rowNumber)
                                         {
                                             <td id="@cellId" style="background-color:darkgray" data-toggle="modal" data-target="#approvalRequest"></td>
@@ -96,12 +97,14 @@
                                             <td id="@cellId" style="background-color:darkgray"></td>
                                         }
                                     }
+                                    // 承認済みタスク
                                     else if (achived.First().IsAuthorized)
                                     {
                                         <td id="@cellId" style="background-color:greenyellow">
-                                            @achived.First().AchievedDateTime.ToString()
+                                            【承認済み】<br />@achived.First().AchievedDateTime.ToString()
                                         </td>
                                     }
+                                    // 未承認タスク
                                     else
                                     {
                                         <td id="@cellId" style="background-color:yellow">
