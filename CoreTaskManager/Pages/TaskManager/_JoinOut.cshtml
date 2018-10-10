@@ -1,0 +1,41 @@
+﻿@model CoreTaskManager.Pages.TaskManager.IndexModel
+
+@inject UserManager<IdentityUser> UserManager
+@*入退出*@
+<div class="row">
+    <div class="col-md-2">
+        <form method="post">
+            @if (Model.Participants.Where(p => p.ProgressId == Model.ThisProgress.Id)
+.Select(p => p.UserName).Contains(User.Identity.Name))
+            {
+                <button type="button" class="btn btn-dark" data-toggle="modal" data-target="#leaveYes">
+                    退出
+                </button>
+            }
+            else
+            {
+                <input type="submit" asp-page-handler="setpariticipant" class="btn btn-primary" value="参加" />
+            }
+        </form>
+    </div>
+</div>
+@*退出確認モーダル*@
+<div class="modal fade" id="leaveYes" tabindex="-1" role="dialog" aria-labelledby="#leaveYesTitle" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="leaveYesTitle">確認</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="閉じる">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <label>本当に退出しますか？</label>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">いいえ</button>
+                <form method="post"><input type="submit" asp-page-handler="deleteparticipant" class="btn btn-danger" value="はい" /></form>
+            </div>
+        </div>
+    </div>
+</div>
