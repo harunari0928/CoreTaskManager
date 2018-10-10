@@ -1,0 +1,52 @@
+﻿body {
+}
+
+table {
+    width: 100%;
+}
+
+.scroll {
+    overflow: auto; /*tableをスクロールさせる*/
+    white-space: nowrap; /*tableのセル内にある文字の折り返しを禁止*/
+}
+
+    .scroll::-webkit-scrollbar { /*tableにスクロールバーを追加*/
+        height: 5px;
+    }
+
+    .scroll::-webkit-scrollbar-track { /*tableにスクロールバーを追加*/
+        background: #F1F1F1;
+    }
+
+    .scroll::-webkit-scrollbar-thumb { /*tableにスクロールバーを追加*/
+        background: #BCBCBC;
+    }
+table {
+    margin: 0 auto;
+    border-radius: 10px;
+    -webkit-border-radius: 10px;
+    -moz-border-radius: 10px;
+    border: 1px solid #666;
+    border-spacing: 0;
+}
+
+td, th {
+    border-bottom: 1px solid #666;
+}
+
+td, th {
+    padding: 10px;
+}
+
+th {
+    background: #EFEFEF;
+}
+
+table tbody tr:last-child th,
+table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+th + th, td {
+    border-left: 1px solid #666;
+}
