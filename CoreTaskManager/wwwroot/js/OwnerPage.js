@@ -48,23 +48,25 @@ class UnappliedTasksTable {
     createTable(tasksObject) {
         let tag;
         tag = "" +
-            "<table id='table' class='table table-hover table-striped table-responsive'>" +
-            "<thead class='thead-dark'>" +
+            "<table id='table' class='table-hover'>" +
+            "<thead>" +
             "<tr>" +
-            "<th scope='col'>ユーザ</th>" +
-            "<th scope='col'>題名</th>" +
-            "<th scope='col'>タスク名</th>" +
-            "<th scope='col'>申請日時</th>" +
+            "<th>ユーザ</th>" +
+            "<th>題名</th>" +
+            "<th>タスク名</th>" +
+            "<th>申請日時</th>" +
             "</tr>" +
             "</thead>" +
             "<tbody>";
         for (let i = 0; i < tasksObject.length; i++) {
+            let dt = new Date(tasksObject[i].achievedDateTime);
+            console.log(dt);
             tag += "" +
                 "<tr id=" + tasksObject[i].achivedTaskId + ">" +
                 "<td>" + tasksObject[i].userName + "</td>" +
                 "<td>" + tasksObject[i].progressName + "</td>" +
                 "<td>" + tasksObject[i].taskName + "</td>" +
-                "<td>" + tasksObject[i].achievedDateTime + "</td>" +
+                "<td>" + (dt.getMonth() + 1) + "月" + dt.getDate() + "日" + dt.getHours() + "時" + dt.getMinutes() + "分" + "</td>" +
                 "<input id='words" + tasksObject[i].achivedTaskId + "' type='hidden' value=" + tasksObject[i].description + "/>" +
                 "</tr>"
                 ;
