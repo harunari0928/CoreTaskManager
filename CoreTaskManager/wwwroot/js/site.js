@@ -2,6 +2,9 @@
 // for details on configuring this project to bundle and minify static web assets.
 
 // Write your Javascript code.
-Pace.on('done', () => {
-            $('.wrap').fadeIn();
-        });
+window.onload = () => {
+    Pace.on('done', () => {
+        $('.wrap').fadeIn();
+    });
+};
+
