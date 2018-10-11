@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <Compile Remove="ApplicationUser.cs" />
+    <Compile Remove="Pages\TaskManager\_ConfirmProgressTable.cshtml.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -44,7 +45,6 @@
     <Content Remove="wwwroot\7043.jpg" />
     <Content Remove="wwwroot\favicon.ico" />
     <Content Remove="wwwroot\isikitakaikeimushoku.PNG" />
-    <Content Remove="wwwroot\js\Progresses.js" />
     <Content Remove="wwwroot\pos.png" />
     <Content Remove="wwwroot\S__3317770.jpg" />
     <Content Remove="wwwroot\S__67665927.jpg" />
@@ -56,9 +56,5 @@
     <Content Remove="wwwroot\ダウンロード.jpg" />
     <Content Remove="wwwroot\環境構築.PNG" />
     <Content Remove="wwwroot\真冬の琵琶湖ツーリング_7633.jpg" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="wwwroot\js\Progresses.js" />
   </ItemGroup>
 </Project>
