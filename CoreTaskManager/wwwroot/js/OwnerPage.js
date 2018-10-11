@@ -52,7 +52,7 @@ class UnappliedTasksTable {
             "<thead>" +
             "<tr>" +
             "<th>ユーザ</th>" +
-            "<th>題名</th>" +
+            "<th>タイトル</th>" +
             "<th>タスク名</th>" +
             "<th>申請日時</th>" +
             "</tr>" +
