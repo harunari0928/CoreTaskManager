@@ -139,7 +139,7 @@ namespace CoreTaskManager.Pages.TaskManager
                     ProgressId = (int)progressId,
                     TaskId = clickedTaskId,
                     UserName = clickedParticipantName,
-                    AchievedDateTime = DateTime.Now,
+                    AchievedDateTime = DateTime.Now.ToLocalTime(),
                     IsAuthorized = false,
                     Description = aSingleWord
                 };
