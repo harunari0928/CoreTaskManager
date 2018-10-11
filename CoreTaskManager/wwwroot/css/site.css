@@ -39,3 +39,7 @@ for details on configuring this project to bundle and minify static web assets. 
 .alert1 {
     color: red;
 }
+
+.pace-running .wrap {
+    display:none;
+}
