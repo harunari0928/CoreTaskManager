@@ -1,9 +1,6 @@
 ﻿body {
 }
 
-table {
-    width: 100%;
-}
 
 .scroll {
     overflow: auto; /*tableをスクロールさせる*/
@@ -29,6 +26,7 @@ table {
     -moz-border-radius: 10px;
     border: 1px solid #666;
     border-spacing: 0;
+    overflow: hidden;
 }
 
 td, th {
