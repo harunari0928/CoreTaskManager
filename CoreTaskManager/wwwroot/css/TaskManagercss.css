@@ -1,6 +1,26 @@
-﻿.alert1 {
-    color: red;
+﻿body {
 }
+
+table {
+    width: 100%;
+}
+
+.scroll {
+    overflow: auto; /*tableをスクロールさせる*/
+    white-space: nowrap; /*tableのセル内にある文字の折り返しを禁止*/
+}
+
+    .scroll::-webkit-scrollbar { /*tableにスクロールバーを追加*/
+        height: 5px;
+    }
+
+    .scroll::-webkit-scrollbar-track { /*tableにスクロールバーを追加*/
+        background: #F1F1F1;
+    }
+
+    .scroll::-webkit-scrollbar-thumb { /*tableにスクロールバーを追加*/
+        background: #BCBCBC;
+    }
 
 table {
     margin: 0 auto;
@@ -9,7 +29,6 @@ table {
     -moz-border-radius: 10px;
     border: 1px solid #666;
     border-spacing: 0;
-    overflow: hidden;
 }
 
 td, th {
@@ -32,4 +51,3 @@ table tbody tr:last-child td {
 th + th, td {
     border-left: 1px solid #666;
 }
-
