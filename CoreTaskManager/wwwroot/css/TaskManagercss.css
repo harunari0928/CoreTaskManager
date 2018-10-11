@@ -1,6 +1,9 @@
 ﻿body {
 }
 
+table {
+    width: 100%;
+}
 
 .scroll {
     overflow: auto; /*tableをスクロールさせる*/

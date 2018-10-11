@@ -5,13 +5,13 @@
 <div class="row">
     @*進捗一覧テーブル*@
     <div class="col-12">
-        @if (Model.Participants.Count != 0)
+        @if (@Model.Participants.Count != 0)
         {
-            <table>
+            <table id="scroll">
                 <thead>
                     <tr>
                         <th style="background-color:#3f3f3f;color:white">　　　　　　　</th>
-                        @foreach (var item in Model.Participants)
+                        @foreach (var item in @Model.Participants)
                         {
                             <th style="background-color:#3f3f3f;color:white">
                                 @{
