@@ -35,66 +35,13 @@
         </div>
         <br />
         <div class="col-md-2">
-            @*ページング*@
-            <form method="post">
-                <nav aria-label="Page navigation">
-                    <ul class="pagination">
-                        <li class="page-item"><input type="submit" asp-page-handler="prevpage" class="page-link" value="Previous" /></li>
-                        <li class="page-item"><input type="submit" asp-page-handler="currentpage" class="page-link" value="@ViewData["CurrentPage"]" /></li>
-                        <li class="page-item"><input type="submit" asp-page-handler="nextpage" class="page-link" value="Next" /></li>
-                    </ul>
-                </nav>
-            </form>
+            <partial name="_Pager" />
         </div>
     </div>
 </div>
-
-@*進捗一覧*@
-<div class="album py-5 bg-light">
-    <div class="container wrap">
-        <div class="row">
-            @foreach (var item in Model.Progresses)
-            {
-                <div class="col-md-4">
-                    <div class="card mb-4 box-shadow" id="@Html.DisplayFor(modelItem => item.Id)">
-                        <img class="card-img-top" data-src="holder.js/100px225?theme=thumb&amp;bg=55595c&amp;fg=eceeef&amp;text=Thumbnail" alt="Thumbnail [100%x225]" style="height: 225px; width: 100%; display: block;" src="@Html.DisplayFor(modelItem => item.Image)" data-holder-rendered="true">
-                        <div class="card-body">
-                            <p class="card-text">
-                                @Html.DisplayFor(modelItem => item.RegisteredDateTime)
-                                <br />
-                                @Html.DisplayFor(modelItem => item.Genre)>@Html.DisplayFor(modelItem => item.Title)
-                            </p>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div class="btn-group">
-                                    <a class="btn btn-sm btn-outline-secondary" asp-page="./Details" asp-route-id="@item.Id">
-                                        Detail
-                                    </a>
-                                    <a class="btn btn-sm btn-outline-secondary" asp-page="./Edit" asp-route-id="@item.Id">
-                                        Edit
-                                    </a>
-                                    <a class="btn btn-sm btn-outline-secondary" asp-page="./Delete" asp-route-id="@item.Id">
-                                        Delete
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            }
-        </div>
-    </div>
-</div>
-
-@*ページング*@
-<form method="post">
-    <nav aria-label="Page navigation">
-        <ul class="pagination">
-            <li class="page-item"><input type="submit" asp-page-handler="prevpage" class="page-link" value="Previous" /></li>
-            <li class="page-item"><input type="submit" asp-page-handler="currentpage" class="page-link" value="@ViewData["CurrentPage"]" /></li>
-            <li class="page-item"><input type="submit" asp-page-handler="nextpage" class="page-link" value="Next" /></li>
-        </ul>
-    </nav>
-</form>
+<partial name="_ProgressesList" />
+<br />
+<partial name="_Pager" />
 @Html.AntiForgeryToken()
 @section Scripts {
     <script src="~/js/Progresses.js"></script>

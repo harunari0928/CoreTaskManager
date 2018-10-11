@@ -1,0 +1,29 @@
+﻿<div class="container scroll">
+    <div class="row">
+        <div class="col-12">
+            <div id="unappliedTaskTable"></div>
+        </div>
+    </div>
+</div>
+@*承認モーダル*@
+<div class="modal fade" id="approval" tabindex="-1" role="dialog" aria-labelledby="#approvalTitle" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="approval">確認</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="閉じる">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <label>コメント</label>
+                <br />
+                <div id="aSingleWord"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-danger" id="approvalRequestButton">承認</button>
+                <button class="btn btn-secondary" data-dismiss="modal">キャンセル</button>
+            </div>
+        </div>
+    </div>
+</div>
