@@ -1,7 +1,8 @@
 ﻿@page
 @model CoreTaskManager.Pages.TaskManager.IndexModel
+@using CoreTaskManager.Model
 
-@inject UserManager<IdentityUser> UserManager
+@inject UserManager<MyIdentityUser> UserManager
 
 @{
     ViewData["Title"] = Model.ThisProgress.Title;
