@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.IO;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using CoreTaskManager.Model;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -16,6 +19,7 @@ namespace CoreTaskManager.Areas.Identity.Pages.Account
     [AllowAnonymous]
     public class RegisterModel : PageModel
     {
+        private readonly IHostingEnvironment _hostingEnvironment;
         private readonly SignInManager<MyIdentityUser> _signInManager;
         private readonly UserManager<MyIdentityUser> _userManager;
         private readonly ILogger<RegisterModel> _logger;
@@ -25,12 +29,14 @@ namespace CoreTaskManager.Areas.Identity.Pages.Account
             UserManager<MyIdentityUser> userManager,
             SignInManager<MyIdentityUser> signInManager,
             ILogger<RegisterModel> logger,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            IHostingEnvironment e)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
+            _hostingEnvironment = e;
         }
 
         [BindProperty]
@@ -60,9 +66,8 @@ namespace CoreTaskManager.Areas.Identity.Pages.Account
             [Compare("Password", ErrorMessage = "パスワードが一致していません")]
             public string ConfirmPassword { get; set; }
 
-            [DataType(DataType.ImageUrl)]
             [Display(Name = "プロフィール画像")]
-            public string ProfileImageUrl { get; set; }
+            public string ProfileImage { get; set; }
         }
 
         public void OnGet(string returnUrl = null)
@@ -70,12 +75,26 @@ namespace CoreTaskManager.Areas.Identity.Pages.Account
             ReturnUrl = returnUrl;
         }
 
-        public async Task<IActionResult> OnPostAsync(string returnUrl = null)
+        public async Task<IActionResult> OnPostAsync(IFormFile file, string returnUrl = null)
         {
             returnUrl = returnUrl ?? Url.Content("~/");
             if (ModelState.IsValid)
             {
-                var user = new MyIdentityUser { UserName = Input.UserName, Email = Input.Email ,ProfileImageUrl = Input.ProfileImageUrl};
+                // 画像登録
+                var imageName = "";
+                if (file != null)
+                {
+                    imageName = Path.GetFileName(file.FileName);
+                    var fileName = Path.Combine(_hostingEnvironment.WebRootPath, imageName);
+                    // 画像ファイル名が重複していた場合、リネーム
+                    if (System.IO.File.Exists(fileName))
+                    {
+                        fileName += "_";
+                    }
+                    file.CopyTo(new FileStream(fileName, FileMode.Create));
+                }
+
+                var user = new MyIdentityUser { UserName = Input.UserName, Email = Input.Email ,ProfileImageUrl = "/" + imageName};
                 var result = await _userManager.CreateAsync(user, Input.Password);
                 if (result.Succeeded)
                 {
