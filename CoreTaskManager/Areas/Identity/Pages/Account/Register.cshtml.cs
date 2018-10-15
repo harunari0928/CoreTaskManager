@@ -1,4 +1,5 @@
-﻿using System;
+﻿using System.Drawing;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
@@ -13,6 +14,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
+using CoreTaskManager.Library;
 
 namespace CoreTaskManager.Areas.Identity.Pages.Account
 {
@@ -85,16 +87,25 @@ namespace CoreTaskManager.Areas.Identity.Pages.Account
                 if (file != null)
                 {
                     imageName = Path.GetFileName(file.FileName);
-                    var fileName = Path.Combine(_hostingEnvironment.WebRootPath, imageName);
+                    var filePath = Path.Combine(_hostingEnvironment.WebRootPath, imageName);
                     // 画像ファイル名が重複していた場合、リネーム
-                    if (System.IO.File.Exists(fileName))
+                    if (System.IO.File.Exists(filePath))
                     {
-                        fileName += "_";
+                        // TODO: 修正
+                        imageName += "_";
+                        filePath += "";
                     }
-                    file.CopyTo(new FileStream(fileName, FileMode.Create));
+                    file.CopyTo(new FileStream(filePath, FileMode.Create));
+                    // 画像リサイズ
+                    var ip = new ImageProcessing();
+                    ip.ResizeImage(filePath);
                 }
 
-                var user = new MyIdentityUser { UserName = Input.UserName, Email = Input.Email ,ProfileImageUrl = "/" + imageName};
+                var user = new MyIdentityUser {
+                    UserName = Input.UserName,
+                    Email = Input.Email ,
+                    ProfileImageUrl = "/" + imageName
+                };
                 var result = await _userManager.CreateAsync(user, Input.Password);
                 if (result.Succeeded)
                 {
