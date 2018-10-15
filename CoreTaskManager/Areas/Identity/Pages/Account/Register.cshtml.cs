@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
+using CoreTaskManager.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -15,14 +16,14 @@ namespace CoreTaskManager.Areas.Identity.Pages.Account
     [AllowAnonymous]
     public class RegisterModel : PageModel
     {
-        private readonly SignInManager<IdentityUser> _signInManager;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly SignInManager<MyIdentityUser> _signInManager;
+        private readonly UserManager<MyIdentityUser> _userManager;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
 
         public RegisterModel(
-            UserManager<IdentityUser> userManager,
-            SignInManager<IdentityUser> signInManager,
+            UserManager<MyIdentityUser> userManager,
+            SignInManager<MyIdentityUser> signInManager,
             ILogger<RegisterModel> logger,
             IEmailSender emailSender)
         {
@@ -40,20 +41,28 @@ namespace CoreTaskManager.Areas.Identity.Pages.Account
         public class InputModel
         {
             [Required]
+            [Display(Name = "ユーザ名")]
+            public string UserName { get; set; }
+
+            [Required]
             [EmailAddress]
-            [Display(Name = "Email")]
+            [Display(Name = "メールアドレス")]
             public string Email { get; set; }
 
             [Required]
             [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
             [DataType(DataType.Password)]
-            [Display(Name = "Password")]
+            [Display(Name = "パスワード")]
             public string Password { get; set; }
 
             [DataType(DataType.Password)]
-            [Display(Name = "Confirm password")]
-            [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
+            [Display(Name = "パスワード確認")]
+            [Compare("Password", ErrorMessage = "パスワードが一致していません")]
             public string ConfirmPassword { get; set; }
+
+            [DataType(DataType.ImageUrl)]
+            [Display(Name = "プロフィール画像")]
+            public string ProfileImageUrl { get; set; }
         }
 
         public void OnGet(string returnUrl = null)
@@ -66,7 +75,7 @@ namespace CoreTaskManager.Areas.Identity.Pages.Account
             returnUrl = returnUrl ?? Url.Content("~/");
             if (ModelState.IsValid)
             {
-                var user = new IdentityUser { UserName = Input.Email, Email = Input.Email };
+                var user = new MyIdentityUser { UserName = Input.UserName, Email = Input.Email ,ProfileImageUrl = Input.ProfileImageUrl};
                 var result = await _userManager.CreateAsync(user, Input.Password);
                 if (result.Succeeded)
                 {
