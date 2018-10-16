@@ -86,19 +86,21 @@ namespace CoreTaskManager.Areas.Identity.Pages.Account
                 var imageName = "";
                 if (file != null)
                 {
+                    file.OpenReadStream();
                     imageName = Path.GetFileName(file.FileName);
                     var filePath = Path.Combine(_hostingEnvironment.WebRootPath, imageName);
                     // 画像ファイル名が重複していた場合、リネーム
                     if (System.IO.File.Exists(filePath))
                     {
                         // TODO: 修正
-                        imageName += "_";
-                        filePath += "";
+                        imageName.Insert(0, "_");
+                        filePath.Insert(0, "_");
                     }
                     file.CopyTo(new FileStream(filePath, FileMode.Create));
-                    // 画像リサイズ
-                    var ip = new ImageProcessing();
-                    ip.ResizeImage(filePath);
+                }
+                else
+                {
+                    imageName = "empty.js";
                 }
 
                 var user = new MyIdentityUser {

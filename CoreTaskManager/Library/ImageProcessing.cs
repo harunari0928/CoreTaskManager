@@ -16,7 +16,7 @@ namespace CoreTaskManager.Library
 
         public void ResizeImage(string inputPath)
         {
-            using (var image = new Bitmap(System.Drawing.Image.FromFile(inputPath)))
+            using (var image = new Bitmap(Image.FromFile(inputPath)))
             {
                 int width, height;
                 if (image.Width > image.Height)
