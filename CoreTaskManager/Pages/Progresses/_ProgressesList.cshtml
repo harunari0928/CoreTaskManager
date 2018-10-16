@@ -14,9 +14,26 @@
                                 <br />
                                 @Html.DisplayFor(modelItem => item.Genre)>@Html.DisplayFor(modelItem => item.Title)
                             </p>
+                            <p>
+                                <ul class="list_user_icon clearfix">
+                                    @{
+                                        string imageUrl = "";
+                                        var admin = Model.ServiceUsers.FirstOrDefault(su => su.UserName == item.UserName);
+                                        if (admin != null)
+                                        {
+                                            imageUrl = admin.ProfileImageUrl;
+                                        }
+                                    }
+
+                                    <li>
+                                        管理者<img src=@Html.DisplayFor(modelItem => imageUrl) width="23" height="23" />
+                                    </li>
+                                </ul>
+                            </p>
                             <div class="d-flex justify-content-between align-items-center">
                                 <div class="btn-group">
-                                    <a class="btn btn-sm btn-outline-secondary" asp-page="./Details" asp-route-id="@item.Id">
+
+                                    @*<a class="btn btn-sm btn-outline-secondary" asp-page="./Details" asp-route-id="@item.Id">
                                         Detail
                                     </a>
                                     <a class="btn btn-sm btn-outline-secondary" asp-page="./Edit" asp-route-id="@item.Id">
@@ -24,7 +41,7 @@
                                     </a>
                                     <a class="btn btn-sm btn-outline-secondary" asp-page="./Delete" asp-route-id="@item.Id">
                                         Delete
-                                    </a>
+                                    </a>*@
                                 </div>
                             </div>
                         </div>

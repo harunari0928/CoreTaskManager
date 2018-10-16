@@ -16,6 +16,7 @@ namespace CoreTaskManager.Pages.Progresses
     public class IndexModel : PageModel
     {
         private readonly Models.CoreTaskManagerContext _context;
+        private readonly Data.ApplicationDbContext _userContext;
         private readonly int _pageSize;
 
         public const string SessionCurrentPage = "CurrentPage";
@@ -25,15 +26,18 @@ namespace CoreTaskManager.Pages.Progresses
         public const string SessionLastPage = "LastPage";
 
 
-        public IndexModel(Models.CoreTaskManagerContext context)
+        public IndexModel(Models.CoreTaskManagerContext context, Data.ApplicationDbContext userContext)
         {
             _context = context;
+            _userContext = userContext;
             _pageSize = 12;
         }
 
         public IList<Progress> Progresses { get; set; }
         public SelectList Genres { get; set; }
+        public IList<Participant> Participants { get; set; }
         public string ProgressGenre { get; set; }
+        public IList<MyIdentityUser> ServiceUsers { get; set; }
 
         public async Task OnGetAsync(string progressGenre, string searchString, string currentPageString)
         {
@@ -51,6 +55,17 @@ namespace CoreTaskManager.Pages.Progresses
             var progresses = FilterProgresses(progressGenre, searchString, currentPageString);
             Progresses = await progresses.ToListAsync();
             Genres = new SelectList(await GenerateGenreList().ToListAsync());
+            ServiceUsers = await _userContext.MyIdentityUsers.ToListAsync();
+            Participants = new List<Participant>();
+            await progresses.Select(p => p.Id).ForEachAsync(id =>
+             {
+                 // 各進捗の参加者を5人ランダムに抽出
+                 var concerned5People = _context.Participants.Where(p => p.ProgressId == id).OrderBy(i => Guid.NewGuid()).Take(5).ToList();
+                 if (concerned5People.Count > 0)
+                 {
+                     concerned5People.ForEach(person => Participants.Add(person));
+                 }
+             });
 
         }
         public async Task OnPostCurrentPage()
