@@ -30,6 +30,7 @@ namespace CoreTaskManager.Pages.Progresses
         {
             _context = context;
             _userContext = userContext;
+            // 一ページに表示する項目の量
             _pageSize = 12;
         }
 

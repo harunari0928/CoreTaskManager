@@ -129,6 +129,10 @@ namespace CoreTaskManager.Pages.OwnerPage
                                 });
                             }
                             ThisProgress = _context.Progresses.FirstOrDefault(p => p.Id == progressId);
+                            if (ThisProgress == null)
+                            {
+                                return new JsonResult("wrongString");
+                            }
                             ThisProgress.NumberOfItems = receiveData.Count;
                         }
                     }
@@ -155,6 +159,7 @@ namespace CoreTaskManager.Pages.OwnerPage
             }
             try
             {
+                // -1は初期化のための値
                 int achievedTaskId = -1;
                 string requestUser = "";
                 {

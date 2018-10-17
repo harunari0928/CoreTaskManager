@@ -44,6 +44,7 @@ namespace CoreTaskManager.Pages.Progresses
             if (file != null)
             {
                 imageName = Path.GetFileName(file.FileName);
+                // 画像ファイルの絶対パス取得
                 var fileName = Path.Combine(_hostingEnvironment.WebRootPath, imageName);
                 file.CopyTo(new FileStream(fileName, FileMode.Create));
 
@@ -52,6 +53,7 @@ namespace CoreTaskManager.Pages.Progresses
             // 自動入力項目
             Progress.UserName = User.Identity.Name;
             Progress.RegisteredDateTime = DateTime.Now;
+            // 進捗が作成された時点で設定されたタスクは0。タスクはOwnerPageで設定できる
             Progress.NumberOfItems = 0;
             Progress.Image = "/" + imageName;
 

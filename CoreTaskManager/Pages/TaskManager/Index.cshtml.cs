@@ -18,12 +18,12 @@ namespace CoreTaskManager.Pages.TaskManager
     [Authorize]
     public class IndexModel : PageModel
     {
-        private readonly CoreTaskManager.Models.CoreTaskManagerContext _context;
+        private readonly Models.CoreTaskManagerContext _context;
         private const string SessionCurrentProgress = "CurrentProgress";
         private const string SessionNumberOfTasks = "NumberOfTasks";
         private const int _pageSize = 5;
 
-        public IndexModel(CoreTaskManager.Models.CoreTaskManagerContext context)
+        public IndexModel(Models.CoreTaskManagerContext context)
         {
             _context = context;
         }
@@ -165,7 +165,7 @@ namespace CoreTaskManager.Pages.TaskManager
                 return new JsonResult("serverError");
             }
         }
-
+        
         public async Task<IActionResult> OnPostSetPariticipant()
         {
             if (!HttpContext.Session.IsAvailable)
@@ -200,8 +200,8 @@ namespace CoreTaskManager.Pages.TaskManager
                 return Redirect("../Progresses");
             }
             var progressId = HttpContext.Session.GetInt32(SessionCurrentProgress);
-            var thisParticipant = _context.Participants.Where(p => p.ProgressId == progressId)
-                .Where(p => p.UserName == User.Identity.Name).First();
+            var thisParticipant = await _context.Participants.Where(p => p.ProgressId == progressId)
+                .Where(p => p.UserName == User.Identity.Name).FirstOrDefaultAsync();
             if (thisParticipant == null)
             {
                 return Redirect($"TaskManager/Index?progressIdString={progressId.ToString()}");
@@ -227,7 +227,6 @@ namespace CoreTaskManager.Pages.TaskManager
         private void NortificationToOutside(Progress progress, TaskModel thisTask, AchievedTask achievedTask, string aSingleWord)
         {
             var wc = new WebClient();
-            // TODO 承認作業用url
             var sendStatement = new StringBuilder();
             sendStatement.AppendLine("<!channel>");
             sendStatement.AppendLine($"{progress.UserName}さん");
@@ -259,7 +258,7 @@ namespace CoreTaskManager.Pages.TaskManager
 
             wc.UploadString(progress.SlackAppUrl, sendData);
         }
-        enum ColumAlphaBet
+        private enum ColumAlphaBet
         {
             A = 0,
             B,
