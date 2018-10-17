@@ -73,7 +73,7 @@ namespace CoreTaskManager.Pages.TaskManager
 
             Participants = await participants.ToListAsync();
             ThisTasks = await tasks.ToListAsync();
-            ThisProgress = await thisProgress.FirstAsync();
+            ThisProgress = await thisProgress.FirstOrDefaultAsync();
             AchivedInThisProgress = await achievedtasks.ToListAsync();
             HttpContext.Session.SetInt32(SessionNumberOfTasks, ThisProgress.NumberOfItems);
             return Page();
@@ -112,6 +112,10 @@ namespace CoreTaskManager.Pages.TaskManager
                 var columAlphabet = (ColumAlphaBet)Enum.Parse(typeof(ColumAlphaBet), cellId[0].ToString());
                 int rowNumber = int.Parse(cellId.Substring(1, cellId.Length - 1));
                 var clickedTask = AcquireClickedTask(_context.Tasks, (int)progressId, rowNumber);
+                if (clickedTask == null)
+                {
+                    return new JsonResult("failed");
+                }
                 int clickedTaskId = clickedTask.Id;
                 var clickedParticipant = AcquireClickedParticipant(_context.Participants, (int)progressId, columAlphabet);
                 var clickedParticipantName = clickedParticipant.UserName;
@@ -221,7 +225,7 @@ namespace CoreTaskManager.Pages.TaskManager
         private TaskModel AcquireClickedTask(DbSet<TaskModel> displayedTasks, int progressId, int rowNumber)
         {
             var selectedTask = displayedTasks.Where(p => p.ProgressId == progressId)
-                .Skip(rowNumber - 1).First();
+                .Skip(rowNumber - 1).FirstOrDefault();
             return selectedTask;
         }
         private void NortificationToOutside(Progress progress, TaskModel thisTask, AchievedTask achievedTask, string aSingleWord)
