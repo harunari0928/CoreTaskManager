@@ -41,5 +41,34 @@ for details on configuring this project to bundle and minify static web assets. 
 }
 
 .pace-running .wrap {
-    display:none;
+    display: none;
+}
+
+.list_user_icon {
+    margin-top: 4px;
+}
+
+    .list_user_icon li {
+        float: left;
+        margin-right: 4px;
+    }
+
+.clearfix:after {
+    content: ".";
+    display: block;
+    height: 0;
+    clear: both;
+    visibility: hidden;
+}
+
+.clearfix {
+    display: inline-block;
+}
+
+* html .clearfix {
+    height: 1%;
+}
+
+.clearfix {
+    display: block;
 }
