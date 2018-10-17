@@ -1,6 +1,9 @@
 ﻿
 window.onload = () => {
     let page = new Paging();
+
+    // ツールチップ
+    $('[data-toggle="tooltip"]').tooltip();
 };
 
 
