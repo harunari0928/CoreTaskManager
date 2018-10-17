@@ -170,7 +170,7 @@ namespace CoreTaskManager.Pages.TaskManager
             }
         }
         
-        public async Task<IActionResult> OnPostSetPariticipant()
+        public async Task<IActionResult> OnPostSetPariticipantAsync()
         {
             if (!HttpContext.Session.IsAvailable)
             {
@@ -193,7 +193,7 @@ namespace CoreTaskManager.Pages.TaskManager
             await _context.SaveChangesAsync();
             return Redirect($"TaskManager/Index?progressIdString={progressId}");
         }
-        public async Task<IActionResult> OnPostDeleteParticipant()
+        public async Task<IActionResult> OnPostDeleteParticipantAsync()
         {
             if (!HttpContext.Session.IsAvailable)
             {

@@ -69,7 +69,7 @@ namespace CoreTaskManager.Pages.Progresses
              });
 
         }
-        public async Task OnPostCurrentPage()
+        public async Task OnPostCurrentPageAsync()
         {
             if (!HttpContext.Session.IsAvailable)
             {
@@ -77,10 +77,10 @@ namespace CoreTaskManager.Pages.Progresses
             }
             var genre = HttpContext.Session.GetString(SessionProgressGenre);
             var searchString = HttpContext.Session.GetString(SessionSearchString);
-            var currentPage = HttpContext.Session.GetString(SessionCurrentPage);
-            await OnGetAsync(genre, searchString, currentPage);
+            var currentPage = HttpContext.Session.GetInt32(SessionCurrentPage);
+            await OnGetAsync(genre, searchString, Convert.ToString(currentPage));
         }
-        public async Task OnPostNextPage()
+        public async Task OnPostNextPageAsync()
         {
             if (!HttpContext.Session.IsAvailable)
             {
@@ -114,7 +114,7 @@ namespace CoreTaskManager.Pages.Progresses
             var searchString = HttpContext.Session.GetString(SessionSearchString);
             await OnGetAsync(progressGenre, searchString, currentPage.ToString());
         }
-        public async Task OnPostPrevPage()
+        public async Task OnPostPrevPageAsync()
         {
             if (!HttpContext.Session.IsAvailable)
             {
