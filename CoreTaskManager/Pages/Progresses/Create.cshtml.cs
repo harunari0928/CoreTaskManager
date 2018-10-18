@@ -40,12 +40,12 @@ namespace CoreTaskManager.Pages.Progresses
             {
                 return Page();
             }
-            var imageName = "";
+            var imageName = "empty.jpg";
             if (file != null)
             {
                 imageName = Path.GetFileName(file.FileName);
                 // 画像ファイルの絶対パス取得
-                var fileName = Path.Combine(_hostingEnvironment.WebRootPath, imageName);
+                var fileName = Path.Combine(_hostingEnvironment.WebRootPath, "userImages", imageName);
                 file.CopyTo(new FileStream(fileName, FileMode.Create));
 
             }

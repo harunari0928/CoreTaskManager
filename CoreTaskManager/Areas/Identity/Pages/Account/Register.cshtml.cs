@@ -83,7 +83,7 @@ namespace CoreTaskManager.Areas.Identity.Pages.Account
             if (ModelState.IsValid)
             {
                 // 画像登録
-                var imageName = "";
+                string imageName = "empty.js";
                 if (file != null)
                 {
                     file.OpenReadStream();
@@ -92,15 +92,11 @@ namespace CoreTaskManager.Areas.Identity.Pages.Account
                     // 画像ファイル名が重複していた場合、リネーム
                     if (System.IO.File.Exists(filePath))
                     {
-                        // TODO: 修正
+                        // 修正
                         imageName.Insert(0, "_");
                         filePath.Insert(0, "_");
                     }
                     file.CopyTo(new FileStream(filePath, FileMode.Create));
-                }
-                else
-                {
-                    imageName = "empty.js";
                 }
 
                 var user = new MyIdentityUser {
