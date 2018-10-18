@@ -88,7 +88,7 @@ namespace CoreTaskManager.Areas.Identity.Pages.Account
                 {
                     file.OpenReadStream();
                     imageName = Path.GetFileName(file.FileName);
-                    var filePath = Path.Combine(_hostingEnvironment.WebRootPath, imageName);
+                    var filePath = Path.Combine(_hostingEnvironment.WebRootPath, "userImages", imageName);
                     // 画像ファイル名が重複していた場合、リネーム
                     if (System.IO.File.Exists(filePath))
                     {
@@ -106,7 +106,7 @@ namespace CoreTaskManager.Areas.Identity.Pages.Account
                 var user = new MyIdentityUser {
                     UserName = Input.UserName,
                     Email = Input.Email ,
-                    ProfileImageUrl = "/" + imageName
+                    ProfileImageUrl = "/userImages/" + imageName
                 };
                 var result = await _userManager.CreateAsync(user, Input.Password);
                 if (result.Succeeded)
