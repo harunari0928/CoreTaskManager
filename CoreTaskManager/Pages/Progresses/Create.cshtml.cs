@@ -55,7 +55,7 @@ namespace CoreTaskManager.Pages.Progresses
             Progress.RegisteredDateTime = DateTime.Now;
             // 進捗が作成された時点で設定されたタスクは0。タスクはOwnerPageで設定できる
             Progress.NumberOfItems = 0;
-            Progress.Image = "/" + imageName;
+            Progress.Image = "/userImages/" + imageName;
 
 
             _context.Progresses.Add(Progress);
