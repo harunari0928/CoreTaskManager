@@ -60,11 +60,11 @@ namespace CoreTaskManager.Pages.Progresses
             Participants = new List<Participant>();
             await progresses.Select(p => p.Id).ForEachAsync(id =>
              {
-                 // 各進捗の参加者を5人ランダムに抽出
-                 var concerned5People = _context.Participants.Where(p => p.ProgressId == id).OrderBy(i => Guid.NewGuid()).Take(5).ToList();
-                 if (concerned5People.Count > 0)
+                 // 各進捗の参加者を4人ランダムに抽出
+                 var concerned4People = _context.Participants.Where(p => p.ProgressId == id).OrderBy(i => Guid.NewGuid()).Take(4).ToList();
+                 if (concerned4People.Count > 0)
                  {
-                     concerned5People.ForEach(person => Participants.Add(person));
+                     concerned4People.ForEach(person => Participants.Add(person));
                  }
              });
         }
