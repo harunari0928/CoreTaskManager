@@ -30,4 +30,34 @@ namespace CoreTaskManager.Model
         public string Description { get; set; }
 
     }
+
+    public static class OperateProgresses
+    {
+        public static IQueryable<Progress> FilterUsingSearchStrings(this Models.CoreTaskManagerContext context,
+            string progressGenre, string searchString)
+        {
+            var progresses = from p in context.Progresses
+                             select p;
+            progresses = progresses.OrderByDescending(p => p.RegisteredDateTime);
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                progresses = progresses.Where(p => p.Title.Contains(searchString));
+            }
+            if (!String.IsNullOrEmpty(progressGenre))
+            {
+                progresses = progresses.Where(x => x.Genre == progressGenre);
+            }
+
+            return progresses;
+        }
+        public static IQueryable<Progress> Paging(this IQueryable<Progress> progresses, int currentPage, int pageSize)
+        {
+            // もし変数currenPageが不正な値であればページは１とする
+            if (currentPage < 1 || pageSize < 1)
+            {
+                throw new ArgumentException();
+            }
+            return progresses.Skip((currentPage - 1) * pageSize).Take(pageSize);
+        }
+    }
 }

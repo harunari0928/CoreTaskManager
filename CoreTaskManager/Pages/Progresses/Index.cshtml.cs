@@ -46,27 +46,45 @@ namespace CoreTaskManager.Pages.Progresses
             {
                 await HttpContext.Session.LoadAsync();
             }
-            if (String.IsNullOrEmpty(currentPageString))
-            {
-                HttpContext.Session.SetInt32(SessionCurrentPage, 1);
-            }
-            HttpContext.Session.SetString(SessionProgressGenre, progressGenre ?? "");
-            HttpContext.Session.SetString(SessionSearchString, searchString ?? "");
 
-            var progresses = FilterProgresses(progressGenre, searchString, currentPageString);
-            Progresses = await progresses.ToListAsync();
-            Genres = new SelectList(await GenerateGenreList().ToListAsync());
-            ServiceUsers = await _userContext.MyIdentityUsers.ToListAsync();
-            Participants = new List<Participant>();
-            await progresses.Select(p => p.Id).ForEachAsync(id =>
-             {
-                 // 各進捗の参加者を4人ランダムに抽出
-                 var concerned4People = _context.Participants.Where(p => p.ProgressId == id).OrderBy(i => Guid.NewGuid()).Take(4).ToList();
-                 if (concerned4People.Count > 0)
-                 {
-                     concerned4People.ForEach(person => Participants.Add(person));
-                 }
-             });
+            try
+            {
+                // 検索クエリをセッションに保存
+                int currentPage = int.Parse(currentPageString);
+                HttpContext.Session.SetInt32(SessionCurrentPage, currentPage);
+                HttpContext.Session.SetString(SessionProgressGenre, progressGenre ?? "");
+                HttpContext.Session.SetString(SessionSearchString, searchString ?? "");
+                ViewData["CurrentPage"] = currentPageString;
+
+                var progresses = _context.FilterUsingSearchStrings(progressGenre, searchString);
+                var progressesInAPage = progresses.Paging(currentPage, _pageSize);
+                Progresses = await progressesInAPage.ToListAsync();
+
+                // ページ遷移制限のための値をセッションに保存
+                int numOfProgresses = progresses.Count();
+                int lastPage = numOfProgresses / _pageSize + 1;
+                HttpContext.Session.SetInt32(SessionNumOfProgresses, numOfProgresses);
+                HttpContext.Session.SetInt32(SessionLastPage, lastPage);
+
+                Genres = new SelectList(await GenerateGenreList().ToListAsync());
+
+                ServiceUsers = await _userContext.MyIdentityUsers.ToListAsync();
+                Participants = new List<Participant>();
+                await progresses.Select(p => p.Id).ForEachAsync(id =>
+                {
+                    // 各進捗の参加者を4人ランダムに抽出
+                    var concerned4People = _context.Participants.Where(p => p.ProgressId == id).OrderBy(i => Guid.NewGuid()).Take(4).ToList();
+                    if (concerned4People.Count > 0)
+                    {
+                        concerned4People.ForEach(person => Participants.Add(person));
+                    }
+                });
+            }
+            catch (Exception e) when (e is ArgumentNullException || e is ArgumentException)
+            {
+                ViewData["CurrentPage"] = "1";
+                await OnGetAsync(progressGenre ?? "", searchString ?? "", "1");
+            }
         }
         public async Task<IActionResult> OnPostCurrentPageAsync()
         {
@@ -136,53 +154,16 @@ namespace CoreTaskManager.Pages.Progresses
             }
             var progressGenre = HttpContext.Session.GetString(SessionProgressGenre);
             var searchString = HttpContext.Session.GetString(SessionSearchString);
-            var progresses = FilterProgresses(progressGenre, searchString, currentPage.ToString());
             return Redirect($"Progresses?progressesGenre={progressGenre}&searchString={searchString}&currentPageString={currentPage}");
         }
 
-        IQueryable<Progress> FilterProgresses(string progressGenre, string searchString, string currentPageString)
-        {
-            int currentPage = 1;
-            ViewData["CurrentPage"] = "1";
-            if (!String.IsNullOrEmpty(currentPageString))
-            {
-                currentPage = int.Parse(currentPageString);
-                ViewData["CurrentPage"] = currentPageString;
-            }
 
-            var progresses = from p in _context.Progresses
-                             select p;
-            progresses = progresses.OrderByDescending(p => p.RegisteredDateTime);
-            if (!String.IsNullOrEmpty(searchString))
-            {
-                progresses = progresses.Where(p => p.Title.Contains(searchString));
-            }
-            if (!String.IsNullOrEmpty(progressGenre))
-            {
-                progresses = progresses.Where(x => x.Genre == progressGenre);
-            }
-
-            HttpContext.Session.SetInt32(SessionNumOfProgresses, progresses.Count());
-            int lastPage = progresses.Count() / _pageSize + 1;
-            HttpContext.Session.SetInt32(SessionLastPage, lastPage);
-            return progresses = Paging(progresses, currentPage, _pageSize);
-        }
         IQueryable<string> GenerateGenreList()
         {
             var genreQuery = from m in _context.Progresses
                              orderby m.Genre
                              select m.Genre;
             return genreQuery.Distinct();
-        }
-        IQueryable<Progress> Paging(IQueryable<Progress> progresses, int currentPage, int pageSize)
-        {
-            // もし変数currenPageが不正な値であればページは１とする
-            if (currentPage < 1)
-            {
-                currentPage = 1;
-            }
-            return progresses.Skip((currentPage - 1) * pageSize).Take(pageSize);
-
         }
     }
 }

@@ -52,16 +52,11 @@ namespace CoreTaskManager.Pages.OwnerPage
             ThisProgress = await thisProgress.FirstAsync();
             return Page();
         }
-        public JsonResult OnPostSendUnappliedTable()
+        public JsonResult OnPostRequestUnappliedItems()
         {
-            int? currentProgress = HttpContext.Session.GetInt32(SessionCurrentProgress);
-            if (currentProgress == null)
-            {
-                Redirect("../Progresses");
-                return new JsonResult("serverError");
-            }
             try
             {
+                int currentProgress = (int)HttpContext.Session.GetInt32(SessionCurrentProgress);
                 AchievedTasks = _context.AchievedTasks.Where(a => a.ProgressId == currentProgress).Where(a => a.IsAuthorized == false).ToList();
                 var unappliedTasks = new List<UnappliedTaskTableModel>();
                 foreach (var achievedTask in AchievedTasks)
@@ -78,8 +73,9 @@ namespace CoreTaskManager.Pages.OwnerPage
                 }
                 return new JsonResult(JsonConvert.SerializeObject(unappliedTasks));
             }
-            catch
+            catch(ArgumentNullException)
             {
+                Redirect("../Progresses");
                 return new JsonResult("serverError");
             }
         }
