@@ -50,6 +50,7 @@ namespace CoreTaskManager.Pages.Progresses
             try
             {
                 // 検索クエリをセッションに保存
+                // TODO: メソッド化
                 int currentPage = int.Parse(currentPageString);
                 HttpContext.Session.SetInt32(SessionCurrentPage, currentPage);
                 HttpContext.Session.SetString(SessionProgressGenre, progressGenre ?? "");
@@ -61,13 +62,15 @@ namespace CoreTaskManager.Pages.Progresses
                 Progresses = await progressesInAPage.ToListAsync();
 
                 // ページ遷移制限のための値をセッションに保存
+                // TODO: メソッド化
                 int numOfProgresses = progresses.Count();
                 int lastPage = numOfProgresses / _pageSize + 1;
                 HttpContext.Session.SetInt32(SessionNumOfProgresses, numOfProgresses);
                 HttpContext.Session.SetInt32(SessionLastPage, lastPage);
 
-                Genres = new SelectList(await GenerateGenreList().ToListAsync());
+                Genres = new SelectList(await _context.GenerateGenreList().ToListAsync());
 
+                // TODO: メソッド化
                 ServiceUsers = await _userContext.MyIdentityUsers.ToListAsync();
                 Participants = new List<Participant>();
                 await progresses.Select(p => p.Id).ForEachAsync(id =>
@@ -155,15 +158,6 @@ namespace CoreTaskManager.Pages.Progresses
             var progressGenre = HttpContext.Session.GetString(SessionProgressGenre);
             var searchString = HttpContext.Session.GetString(SessionSearchString);
             return Redirect($"Progresses?progressesGenre={progressGenre}&searchString={searchString}&currentPageString={currentPage}");
-        }
-
-
-        IQueryable<string> GenerateGenreList()
-        {
-            var genreQuery = from m in _context.Progresses
-                             orderby m.Genre
-                             select m.Genre;
-            return genreQuery.Distinct();
         }
     }
 }

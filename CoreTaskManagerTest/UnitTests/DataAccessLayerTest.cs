@@ -6,18 +6,18 @@ using CoreTaskmanager.Utilities;
 using System.Linq;
 using System.Collections.Generic;
 
-namespace ProgressesPageUnitTest
+namespace CoreTaskManagerTest.UnitTests
 {
-    public class ProgressesPagesModelTest
+    public class DataAccessLayerTest
     {
 
         [Fact]
-        public void CorrectBehave_Filtering_WhenInputSearchQuery()
+        public void Wether_CorrectBehave_Filtering_WhenInputSearchQuery_UsingTestData1()
         {
             using (var db = new CoreTaskManagerContext(Utilities.TestDbContextOptions()))
             {
                 // Arrange
-                db.Progresses.AddRange(SeedTestProgressesData());
+                db.Progresses.AddRange(SeedTestProgressesData1());
                 db.SaveChanges();
                 var expectedProgresses = db.Progresses.Where(d => d.Title == "a");
                 var expectedProgresses2 = db.Progresses.Where(d => d.Title == "あ");
@@ -62,12 +62,12 @@ namespace ProgressesPageUnitTest
         }
 
         [Fact]
-        public void CorrectBehave_Paging()
+        public void Wether_CorrectBehave_Paging_UsingTestData1()
         {
             using (var db = new CoreTaskManagerContext(Utilities.TestDbContextOptions()))
             {
                 // Arrage
-                db.Progresses.AddRange(SeedTestProgressesData());
+                db.Progresses.AddRange(SeedTestProgressesData1());
                 db.SaveChanges();
                 var progresses = db.Progresses.AsQueryable();
 
@@ -96,14 +96,48 @@ namespace ProgressesPageUnitTest
             }
         }
 
-        private static List<Progress> SeedTestProgressesData()
+        [Fact]
+        public void Wether_CorrectBehave_GenerateGenre_UsingTestData1()
+        {
+            using (var db = new CoreTaskManagerContext(Utilities.TestDbContextOptions()))
+            {
+                // Arrage
+                db.Progresses.AddRange(SeedTestProgressesData1());
+                db.SaveChanges();
+
+                // Act
+                var genre = db.GenerateGenreList();
+
+                // Assert
+                Assert.Equal(2, genre.Count());
+                Assert.Equal(1, genre.Where(g => g == "ソフトウェア").Count());
+                Assert.Equal(1, genre.Where(g => g == "松村").Count());
+            }
+        }
+
+        [Fact]
+        public void Wether_CorrectBehave_GenerateGenre_UsingNoData()
+        {
+            using (var db = new CoreTaskManagerContext(Utilities.TestDbContextOptions()))
+            {
+                // Act
+                var genre = db.GenerateGenreList();
+
+                // Assert
+                Assert.Equal(0, genre.Count());
+            }
+        }
+
+        // Dont change this method contents! Tests depedent on this Method.
+        private static List<Progress> SeedTestProgressesData1()
         {
             return new List<Progress>
                 {
                     new Progress
                     {
                         Id = 1,
-                        Title = "テスト"
+                        Title = "テスト",
+                        Genre = "松村"
                     },
                     new Progress
                     {
@@ -127,11 +161,13 @@ namespace ProgressesPageUnitTest
                     {
                         Id = 5,
                         Title = "い",
+                        Genre = "松村"
                     },
                     new Progress
                     {
                         Id = 6,
                         Title = "Web開発",
+                        Genre = "ソフトウェア"
                     }
                 };
         }

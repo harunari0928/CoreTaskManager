@@ -59,5 +59,13 @@ namespace CoreTaskManager.Model
             }
             return progresses.Skip((currentPage - 1) * pageSize).Take(pageSize);
         }
+
+        public static IQueryable<string> GenerateGenreList(this Models.CoreTaskManagerContext context)
+        {
+            var genreQuery = from m in context.Progresses
+                             orderby m.Genre
+                             select m.Genre;
+            return genreQuery.Distinct();
+        }
     }
 }
