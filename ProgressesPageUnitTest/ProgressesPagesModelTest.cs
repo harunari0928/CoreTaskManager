@@ -10,12 +10,51 @@ namespace ProgressesPageUnitTest
 {
     public class ProgressesPagesModelTest
     {
+
         [Fact]
         public void CorrectBehave_Filtering_WhenInputSearchQuery()
         {
             using (var db = new CoreTaskManagerContext(Utilities.TestDbContextOptions()))
             {
                 // Arrange
+                var testProgresses = new List<Progress>
+                {
+                    new Progress
+                    {
+                        Id = 1,
+                        Title = "テスト"
+                    },
+                    new Progress
+                    {
+                        Id = 2,
+                        Title = "テスト",
+                        Genre = "ソフトウェア"
+                    },
+                    new Progress
+                    {
+                        Id = 3,
+                        Title = "Web開発",
+                        Genre = "ソフトウェア"
+                    },
+                    new Progress
+                    {
+                        Id = 4,
+                        Title = "Web開発",
+                        Genre = "ソフトウェア"
+                    },
+                    new Progress
+                    {
+                        Id = 5,
+                        Title = "い",
+                    },
+                    new Progress
+                    {
+                        Id = 6,
+                        Title = "Web開発",
+                    }
+                };
+                testProgresses.ForEach(t => db.Progresses.Add(t));
+                db.SaveChanges();
                 var expectedProgresses = db.Progresses.Where(d => d.Title == "a");
                 var expectedProgresses2 = db.Progresses.Where(d => d.Title == "あ");
                 var expectedProgresses3 = db.Progresses.Where(d => d.Title == "い");
@@ -94,7 +133,6 @@ namespace ProgressesPageUnitTest
                 var progresses = db.Progresses.AsQueryable();
                 tests.ForEach(t => db.Progresses.Add(t));
                 db.SaveChanges();
-                
                 // Act
                 var result = progresses.Paging(1, 1);
 
