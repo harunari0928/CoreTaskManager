@@ -1,6 +1,7 @@
 ﻿using CoreTaskManager.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Hosting.Internal;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -18,7 +19,8 @@ namespace CoreTaskManager.Pages.Progresses
     {
         private readonly IHostingEnvironment _hostingEnvironment;
         private readonly CoreTaskManager.Models.CoreTaskManagerContext _context;
-        
+        private HostingApplication.Context context;
+
         public CreateModel(CoreTaskManager.Models.CoreTaskManagerContext context, IHostingEnvironment e)
         {
             _context = context;

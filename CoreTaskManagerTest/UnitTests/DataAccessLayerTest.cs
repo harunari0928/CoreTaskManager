@@ -1,10 +1,10 @@
-using System;
-using Xunit;
+using CoreTaskmanager.Utilities;
 using CoreTaskManager.Model;
 using CoreTaskManager.Models;
-using CoreTaskmanager.Utilities;
-using System.Linq;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using Xunit;
 
 namespace CoreTaskManagerTest.UnitTests
 {
@@ -17,7 +17,7 @@ namespace CoreTaskManagerTest.UnitTests
             using (var db = new CoreTaskManagerContext(Utilities.TestDbContextOptions()))
             {
                 // Arrange
-                db.Progresses.AddRange(SeedTestProgressesData1());
+                db.Progresses.AddRange(GetSeedingProgressesTestData1());
                 db.SaveChanges();
                 var expectedProgresses = db.Progresses.Where(d => d.Title == "a");
                 var expectedProgresses2 = db.Progresses.Where(d => d.Title == "‚ ");
@@ -67,7 +67,7 @@ namespace CoreTaskManagerTest.UnitTests
             using (var db = new CoreTaskManagerContext(Utilities.TestDbContextOptions()))
             {
                 // Arrage
-                db.Progresses.AddRange(SeedTestProgressesData1());
+                db.Progresses.AddRange(GetSeedingProgressesTestData1());
                 db.SaveChanges();
                 var progresses = db.Progresses.AsQueryable();
 
@@ -102,7 +102,7 @@ namespace CoreTaskManagerTest.UnitTests
             using (var db = new CoreTaskManagerContext(Utilities.TestDbContextOptions()))
             {
                 // Arrage
-                db.Progresses.AddRange(SeedTestProgressesData1());
+                db.Progresses.AddRange(GetSeedingProgressesTestData1());
                 db.SaveChanges();
 
                 // Act
@@ -129,7 +129,7 @@ namespace CoreTaskManagerTest.UnitTests
         }
 
         // Dont change this method contents! Tests depedent on this Method.
-        private static List<Progress> SeedTestProgressesData1()
+        private List<Progress> GetSeedingProgressesTestData1()
         {
             return new List<Progress>
                 {

@@ -42,13 +42,13 @@ namespace CoreTaskManager.Pages.Progresses
 
         public async Task OnGetAsync(string progressGenre, string searchString, string currentPageString)
         {
-            if (!HttpContext.Session.IsAvailable)
-            {
-                await HttpContext.Session.LoadAsync();
-            }
-
             try
             {
+                if (!HttpContext.Session.IsAvailable)
+                {
+                    await HttpContext.Session.LoadAsync();
+                }
+
                 // 検索クエリをセッションに保存
                 // TODO: メソッド化
                 int currentPage = int.Parse(currentPageString);
@@ -62,10 +62,7 @@ namespace CoreTaskManager.Pages.Progresses
                 Progresses = await progressesInAPage.ToListAsync();
 
                 // ページ遷移制限のための値をセッションに保存
-                // TODO: メソッド化
-                int numOfProgresses = progresses.Count();
-                int lastPage = numOfProgresses / _pageSize + 1;
-                HttpContext.Session.SetInt32(SessionNumOfProgresses, numOfProgresses);
+                int lastPage = progresses.Count() / _pageSize + 1;
                 HttpContext.Session.SetInt32(SessionLastPage, lastPage);
 
                 Genres = new SelectList(await _context.GenerateGenreList().ToListAsync());
@@ -83,7 +80,8 @@ namespace CoreTaskManager.Pages.Progresses
                     }
                 });
             }
-            catch (Exception e) when (e is ArgumentNullException || e is ArgumentException)
+            catch (Exception e) when (e is ArgumentNullException || 
+            e is ArgumentException || e is NullReferenceException)
             {
                 ViewData["CurrentPage"] = "1";
                 await OnGetAsync(progressGenre ?? "", searchString ?? "", "1");
