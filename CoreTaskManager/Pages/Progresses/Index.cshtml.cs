@@ -93,9 +93,9 @@ namespace CoreTaskManager.Pages.Progresses
             {
                 await HttpContext.Session.LoadAsync();
             }
-            var genre = HttpContext.Session.GetString(SessionProgressGenre);
-            var searchString = HttpContext.Session.GetString(SessionSearchString);
-            var currentPage = HttpContext.Session.GetInt32(SessionCurrentPage);
+            var genre = HttpContext.Session.GetString(SessionProgressGenre ?? "");
+            var searchString = HttpContext.Session.GetString(SessionSearchString ?? "");
+            var currentPage = HttpContext.Session.GetInt32(SessionCurrentPage ?? "1");
             return Redirect($"Progresses?progressesGenre={genre}&searchString={searchString}&currentPageString={currentPage}");
         }
         public async Task<IActionResult> OnPostNextPageAsync()
@@ -104,57 +104,56 @@ namespace CoreTaskManager.Pages.Progresses
             {
                 await HttpContext.Session.LoadAsync();
             }
-            // sessionページ数がnullであれば1を代入
-            int currentPage = 1;
-            if (HttpContext.Session.GetInt32(SessionCurrentPage) != null)
+
+            int currentPage, lastPage;
+            try
             {
-                currentPage = (int)HttpContext.Session.GetInt32(SessionCurrentPage);
+               currentPage = (int)HttpContext.Session.GetInt32(SessionCurrentPage);
+               lastPage = (int)HttpContext.Session.GetInt32(SessionLastPage);
+               currentPage++;
+               if (currentPage > lastPage)
+               {
+                   currentPage = lastPage;
+               }
             }
-            int lastPage;
-            if (HttpContext.Session.GetInt32(SessionLastPage) != null)
+            catch (ArgumentNullException)
             {
-                lastPage = (int)HttpContext.Session.GetInt32(SessionLastPage);
-            }
-            else
-            {
+                currentPage = 1;
                 lastPage = _context.Progresses.Count() / _pageSize + 1;
             }
-            currentPage++;
-            if (currentPage > lastPage)
-            {
-                currentPage = lastPage;
-            }
-            else
-            {
-                HttpContext.Session.SetInt32(SessionCurrentPage, currentPage);
-            }
-            var progressGenre = HttpContext.Session.GetString(SessionProgressGenre);
-            var searchString = HttpContext.Session.GetString(SessionSearchString);
+
+            HttpContext.Session.SetInt32(SessionCurrentPage, currentPage);
+            var progressGenre = HttpContext.Session.GetString(SessionProgressGenre ?? "");
+            var searchString = HttpContext.Session.GetString(SessionSearchString ?? "");
             return Redirect($"Progresses?progressesGenre={progressGenre}&searchString={searchString}&currentPageString={currentPage}");
         }
+
         public async Task<IActionResult> OnPostPrevPageAsync()
         {
             if (!HttpContext.Session.IsAvailable)
             {
                 await HttpContext.Session.LoadAsync();
             }
-            int currentPage = 1;
-            if (HttpContext.Session.GetInt32(SessionCurrentPage) != null)
+
+            int currentPage;
+            try
             {
                 currentPage = (int)HttpContext.Session.GetInt32(SessionCurrentPage);
+                currentPage--;
+                if (currentPage < 1)
+                {
+                    currentPage = 1;
+                }
             }
-            currentPage--;
-            if (currentPage < 1)
+            catch (ArgumentNullException)
             {
                 currentPage = 1;
-                HttpContext.Session.SetInt32(SessionCurrentPage, 1);
             }
-            else
-            {
-                HttpContext.Session.SetInt32(SessionCurrentPage, currentPage);
-            }
-            var progressGenre = HttpContext.Session.GetString(SessionProgressGenre);
-            var searchString = HttpContext.Session.GetString(SessionSearchString);
+
+
+            HttpContext.Session.SetInt32(SessionCurrentPage, currentPage);
+            var progressGenre = HttpContext.Session.GetString(SessionProgressGenre ?? "");
+            var searchString = HttpContext.Session.GetString(SessionSearchString ?? "");
             return Redirect($"Progresses?progressesGenre={progressGenre}&searchString={searchString}&currentPageString={currentPage}");
         }
     }
