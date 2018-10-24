@@ -38,7 +38,7 @@ namespace CoreTaskManager.Pages.Progresses
         public SelectList Genres { get; set; }
         public IList<Participant> Participants { get; set; }
         public string ProgressGenre { get; set; }
-        public IList<MyIdentityUser> ServiceUsers { get; set; }
+        public IList<MyIdentityUser> AllUsers { get; set; }
 
         public async Task OnGetAsync(string progressGenre, string searchString, string currentPageString)
         {
@@ -67,18 +67,8 @@ namespace CoreTaskManager.Pages.Progresses
 
                 Genres = new SelectList(await _context.GenerateGenreList().ToListAsync());
 
-                // TODO: メソッド化
-                ServiceUsers = await _userContext.MyIdentityUsers.ToListAsync();
-                
-                await progresses.Select(p => p.Id).ForEachAsync(id =>
-                {
-                    // 各進捗の参加者を4人ランダムに抽出
-                    var concerned4People = _context.Participants.Where(p => p.ProgressId == id).OrderBy(i => Guid.NewGuid()).Take(4);
-                    if (concerned4People.Count() > 0)
-                    {
-                        Participants.ToList().AddRange(concerned4People);
-                    }
-                });
+                AllUsers = await _userContext.MyIdentityUsers.ToListAsync();
+                Participants = await _context.Participants.ToListAsync();
             }
             catch (Exception e) when (e is ArgumentNullException || 
             e is ArgumentException || e is NullReferenceException)

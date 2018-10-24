@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using CoreTaskManager.Model;
 using Microsoft.EntityFrameworkCore;
-using CoreTaskManager.Model;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace CoreTaskManager.Models
 {

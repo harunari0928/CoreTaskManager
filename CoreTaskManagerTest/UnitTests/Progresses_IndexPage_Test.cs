@@ -27,11 +27,7 @@ namespace CoreTaskManagerTest.UnitTests
             mockCtmc.Setup(db => db.GetProgressAsync()).Returns(Task.FromResult(expectedProgresses));
             mockAdc.Setup(db => db.GetIdentityAsync()).Returns(Task.FromResult(expectedIdentities));
             var pageModel = new IndexModel(mockCtmc.Object, mockAdc.Object);
-            
-            PageModel.HttpContext
 
-            // Act
-            await pageModel.OnGetAsync("","","");
 
             //Assert.Equal(1, 1);
             // Assert
