@@ -19,14 +19,9 @@
                                 <h6>管理者</h6>
                                 <ul class="list_user_icon clearfix">
                                     @{
-                                        string imageUrl = "";
-                                        string userName = "";
                                         var admin = Model.AllUsers.FirstOrDefault(su => su.UserName == item.UserName);
-                                        if (admin != null)
-                                        {
-                                            imageUrl = admin.ProfileImageUrl;
-                                            userName = admin.UserName;
-                                        }
+                                        string imageUrl = admin.ProfileImageUrl ?? "";
+                                        string userName = admin.UserName ?? "";
                                     }
                                     <li style="list-style:none;">
                                         <img src=@Html.DisplayFor(modelItem => imageUrl) width="50" height="50" data-toggle="tooltip" data-placement="top" title="@Html.DisplayFor(modelItem => userName)" />
