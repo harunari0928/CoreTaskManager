@@ -69,14 +69,14 @@ namespace CoreTaskManager.Pages.Progresses
 
                 // TODO: メソッド化
                 ServiceUsers = await _userContext.MyIdentityUsers.ToListAsync();
-                Participants = new List<Participant>();
+                
                 await progresses.Select(p => p.Id).ForEachAsync(id =>
                 {
                     // 各進捗の参加者を4人ランダムに抽出
-                    var concerned4People = _context.Participants.Where(p => p.ProgressId == id).OrderBy(i => Guid.NewGuid()).Take(4).ToList();
-                    if (concerned4People.Count > 0)
+                    var concerned4People = _context.Participants.Where(p => p.ProgressId == id).OrderBy(i => Guid.NewGuid()).Take(4);
+                    if (concerned4People.Count() > 0)
                     {
-                        concerned4People.ForEach(person => Participants.Add(person));
+                        Participants.ToList().AddRange(concerned4People);
                     }
                 });
             }

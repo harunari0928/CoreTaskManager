@@ -67,5 +67,6 @@ namespace CoreTaskManager.Model
                              select m.Genre;
             return genreQuery.Distinct();
         }
+
     }
 }
