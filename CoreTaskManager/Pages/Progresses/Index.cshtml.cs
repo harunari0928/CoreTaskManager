@@ -117,7 +117,6 @@ namespace CoreTaskManager.Pages.Progresses
             var searchString = HttpContext.Session.GetString(SessionSearchString ?? "");
             return Redirect($"Progresses?progressesGenre={progressGenre}&searchString={searchString}&currentPageString={currentPage}");
         }
-
         public async Task<IActionResult> OnPostPrevPageAsync()
         {
             if (!HttpContext.Session.IsAvailable)
